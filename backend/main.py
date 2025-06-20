@@ -55,7 +55,7 @@ class SetupRequest(BaseModel):
 
 class StartGameRequest(BaseModel):
     """Request model for starting game generation"""
-    custom_prompt: Optional[str] = None
+    extra_prompt: Optional[str] = None
 
 class SetupResponse(BaseModel):
     """Response model for setup endpoint"""
@@ -189,17 +189,17 @@ async def start_game(start_request: StartGameRequest, background_tasks: Backgrou
         raise HTTPException(status_code=400, detail="Game is not ready to start")
     
     game_id = str(uuid.uuid4())
-    background_tasks.add_task(generate_game_content, game_id, start_request.custom_prompt)
+    background_tasks.add_task(generate_game_content, game_id, start_request.extra_prompt)
     
     return StartGameResponse(status="generation_started", game_id=game_id, message="Generating game content...")
 
-async def generate_game_content(game_id: str, custom_prompt: Optional[str]):
+async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
     """Generate game script and assets"""
     try:
         game_state["current_state"] = "generating"
         
         # Generate script using Ollama
-        script = await generate_script(custom_prompt)
+        script = await generate_script(extra_prompt)
         
         # Save script
         script_path = os.path.join(GAME_DATA_DIR, f"{game_id}_script.json")
@@ -229,7 +229,7 @@ async def generate_game_content(game_id: str, custom_prompt: Optional[str]):
         game_state["current_state"] = "generation_error"
         print(f"Game generation failed: {e}")
 
-async def generate_script(custom_prompt: Optional[str]) -> Dict:
+async def generate_script(extra_prompt: Optional[str]) -> Dict:
     """Generate murder mystery script using Ollama"""
     
     default_prompt = """สร้างบทหนังสืบสวนคดีฆาตรกรรมที่มีความซับซ้อนและน่าติดตาม โดยมีตัวละครหลายตัวที่มีความลับและแรงจูงใจที่แตกต่างกัน เพื่อนำไปใช้เป็นบทของเกมสิบสวน
@@ -280,7 +280,11 @@ async def generate_script(custom_prompt: Optional[str]) -> Dict:
 
 *GIVEN ME A VALID JSON FORMAT*"""
     
-    prompt = custom_prompt if custom_prompt else default_prompt
+    # Combine default prompt with extra prompt if provided
+    if extra_prompt:
+        prompt = default_prompt + "\n\nเพิ่มเติม: " + extra_prompt
+    else:
+        prompt = default_prompt
     
     async with aiohttp.ClientSession() as session:
         async with session.post(
