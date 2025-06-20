@@ -9,6 +9,7 @@ import uuid
 from PIL import Image
 import asyncio
 from typing import Optional, List
+from huggingface_hub import login
 
 app = FastAPI(
     title="Flux Image Generation Service",
@@ -29,6 +30,11 @@ app.add_middleware(
 
 # Global pipeline variable
 pipe = None
+
+# Environment variables for Hugging Face configuration
+HF_TOKEN = os.getenv("HF_TOKEN")
+HF_MODEL_REPO = os.getenv("HF_MODEL_REPO", "black-forest-labs/FLUX.1-dev")
+HF_CACHE_DIR = os.getenv("HF_CACHE_DIR", "/app/models")
 
 class ImageRequest(BaseModel):
     """Request model for image generation"""
@@ -89,16 +95,28 @@ async def load_model():
     """Load the Flux model on startup"""
     global pipe
     try:
-        print("Loading Flux model...")
+        # Login to Hugging Face if token is provided
+        if HF_TOKEN:
+            print("Logging in to Hugging Face...")
+            login(token=HF_TOKEN)
+            print("Hugging Face login successful!")
+        else:
+            print("Warning: No HF_TOKEN provided. Some models may not be accessible.")
+        
+        print(f"Loading Flux model from {HF_MODEL_REPO}...")
         pipe = FluxPipeline.from_pretrained(
-            "black-forest-labs/FLUX.1-dev",  # Using dev model as requested
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+            HF_MODEL_REPO,
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            cache_dir=HF_CACHE_DIR
         )
         if torch.cuda.is_available():
             pipe = pipe.to("cuda")
-        print("Flux Dev model loaded successfully!")
+        print(f"Flux model ({HF_MODEL_REPO}) loaded successfully!")
     except Exception as e:
         print(f"Error loading model: {e}")
+        if "access" in str(e).lower() or "gated" in str(e).lower():
+            print("This might be due to missing or invalid HF_TOKEN for gated models.")
+            print("Please check your Hugging Face token and model access permissions.")
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
@@ -366,10 +384,15 @@ async def reload_model():
                 model_loaded=True
             )
         
-        print("Reloading Flux model...")
+        # Login to Hugging Face if token is provided
+        if HF_TOKEN:
+            login(token=HF_TOKEN)
+        
+        print(f"Reloading Flux model from {HF_MODEL_REPO}...")
         pipe = FluxPipeline.from_pretrained(
-            "black-forest-labs/FLUX.1-dev",
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+            HF_MODEL_REPO,
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            cache_dir=HF_CACHE_DIR
         )
         if torch.cuda.is_available():
             pipe = pipe.to("cuda")
