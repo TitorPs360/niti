@@ -201,11 +201,6 @@ async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
         # Generate script using Ollama
         script = await generate_script(extra_prompt)
         
-        # Save script
-        script_path = os.path.join(GAME_DATA_DIR, f"{game_id}_script.json")
-        with open(script_path, 'w', encoding='utf-8') as f:
-            json.dump(script, f, ensure_ascii=False, indent=2)
-        
         # Generate character images
         await generate_character_images(script["people"], game_id)
         
@@ -214,6 +209,13 @@ async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
         
         # Wait for all image generation to complete
         await wait_for_all_images_complete(script)
+        
+        # Save script with image_ids
+        script_path = os.path.join(GAME_DATA_DIR, f"{game_id}_script.json")
+        with open(script_path, 'w', encoding='utf-8') as f:
+            json.dump(script, f, ensure_ascii=False, indent=2)
+        
+        print(f"Script saved with image IDs: {script_path}")
         
         # Unload Flux model to free memory
         await unload_flux_model()
@@ -320,21 +322,31 @@ async def generate_character_images(people: List[Dict], game_id: str):
     """Generate character images using Flux"""
     for i, person in enumerate(people):
         if "characteristics" in person:
+            filename = f"{game_id}_character_{i}_{person['name']}"
+            print(f"Generating character image: {filename}")
             image_id = await request_image_generation(
                 person["characteristics"],
-                f"{game_id}_character_{i}_{person['name']}"
+                filename
             )
             person["image_id"] = image_id
+            print(f"Character image generated: {person['name']} -> {image_id}")
+        else:
+            print(f"No characteristics found for character: {person.get('name', 'unknown')}")
 
 async def generate_evidence_images(evidence: List[Dict], game_id: str):
     """Generate evidence images using Flux"""
     for i, item in enumerate(evidence):
         if "image_generation_prompt" in item:
+            filename = f"{game_id}_evidence_{i}_{item['type']}"
+            print(f"Generating evidence image: {filename}")
             image_id = await request_image_generation(
                 item["image_generation_prompt"],
-                f"{game_id}_evidence_{i}_{item['type']}"
+                filename
             )
             item["image_id"] = image_id
+            print(f"Evidence image generated: {item['type']} -> {image_id}")
+        else:
+            print(f"No image_generation_prompt found for evidence: {item.get('type', 'unknown')}")
 
 async def request_image_generation(prompt: str, filename: str) -> str:
     """Request image generation from Flux service"""
