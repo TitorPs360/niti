@@ -111,10 +111,8 @@ async def load_model():
         )
 
         # Save some VRAM by offloading the model to CPU
-        pipe.enable_model_cpu_offload()
-
         if torch.cuda.is_available():
-            pipe = pipe.to("cuda")
+            pipe.enable_model_cpu_offload()
         print(f"Flux model ({HF_MODEL_REPO}) loaded successfully!")
     except Exception as e:
         print(f"Error loading model: {e}")
@@ -400,10 +398,8 @@ async def reload_model():
         )
 
         # Save some VRAM by offloading the model to CPU
-        pipe.enable_model_cpu_offload()
-
         if torch.cuda.is_available():
-            pipe = pipe.to("cuda")
+            pipe.enable_model_cpu_offload()
         
         return ModelResponse(
             status="success",
