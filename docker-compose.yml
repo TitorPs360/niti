@@ -1,0 +1,75 @@
+version: '3.8'
+services:
+  # React Frontend Game Client
+  game-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - game-backend
+      - flux-service
+      - ollama-service
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8001
+      - REACT_APP_FLUX_URL=http://localhost:8000
+      - REACT_APP_OLLAMA_URL=http://localhost:11434
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  # Game Backend API
+  game-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '8001:8001'
+    depends_on:
+      - flux-service
+      - ollama-service
+    environment:
+      - FLUX_SERVICE_URL=http://flux-service:8000
+      - OLLAMA_SERVICE_URL=http://ollama-service:11434
+    volumes:
+      - ./game_data:/app/game_data
+      - ./assets:/app/assets
+
+  # Flux Image Generation Service
+  flux-service:
+    build:
+      context: ./flux-service
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./models:/app/models
+      - ./assets:/app/outputs
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Ollama LLM Service
+  ollama-service:
+    image: ollama/ollama:latest
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  ollama-data:
