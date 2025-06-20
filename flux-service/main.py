@@ -106,7 +106,7 @@ async def load_model():
         print(f"Loading Flux model from {HF_MODEL_REPO}...")
         pipe = FluxPipeline.from_pretrained(
             HF_MODEL_REPO,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            torch_dtype=torch.bfloat16,
             cache_dir=HF_CACHE_DIR
         )
 
@@ -393,7 +393,7 @@ async def reload_model():
         print(f"Reloading Flux model from {HF_MODEL_REPO}...")
         pipe = FluxPipeline.from_pretrained(
             HF_MODEL_REPO,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            torch_dtype=torch.bfloat16,
             cache_dir=HF_CACHE_DIR
         )
 
