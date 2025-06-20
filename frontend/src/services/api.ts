@@ -71,8 +71,6 @@ export class GameAPI {
   }
 
   static async getGameImage(imageId: string): Promise<string> {
-    console.log(`Fetching image from: ${API_BASE}/game/image/${imageId}`);
-    
     const response = await fetch(`${API_BASE}/game/image/${imageId}`, {
       method: 'GET',
       headers: {
@@ -80,22 +78,13 @@ export class GameAPI {
       },
     });
     
-    console.log('Image fetch response status:', response.status, response.statusText);
-    
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Image fetch error response:', errorText);
       throw new Error(`Get image failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
     
-    const contentType = response.headers.get('content-type');
-    console.log('Image content type:', contentType);
-    
     const blob = await response.blob();
-    console.log('Image blob size:', blob.size, 'type:', blob.type);
-    
     const url = URL.createObjectURL(blob);
-    console.log('Created blob URL:', url);
     
     return url;
   }
