@@ -246,7 +246,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         "details": "The security guard pointed at the avenue direction and kept uttering 'white clothes'."
     },
     "people": [ // สร้างตัวละครโดยใช้โครงสร้างที่กำหนดไว้ดังนี้:
-        // ระบุลักษณะและแรงจูงใจของตัวละคนให้ชัดเจน รวมถึงหลักฐานที่อยู่ของพวกเขาด้วย
+        // ระบุลักษณะและแรงจูงใจของตัวละคนให้ชัดเจน รวมถึงหลักฐานที่อยู่ของพวกเขาด้วย, ชื่อ อายุ และส่วนอื่นๆ สามารถเปลี่ยนแปลงได้ตามความเหมาะสม
         {
             "name": "ดร. ณิชา วงศ์พิทักษ์",
             "age": "25",
@@ -260,16 +260,16 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         }
     ],
     "evidence": [
-        // สร้างหลักฐานที่เกี่ยวข้องกับคดีนี้ โดยใช้โครงสร้างที่กำหนด
+        // สร้างหลักฐานที่เกี่ยวข้องกับคดีนี้ โดยใช้โครงสร้างที่กำหนด, ประเภท คำอธิบาย และส่วนอื่นๆ สามารถเปลี่ยนแปลงได้ตามความเหมาะสม
         {
-            "type": "DNA",
-            "description": "พบ DNA ของผู้ต้องสงสัยที่เกิดเหตุ",
-            "location": "บนเสื้อผ้าของเหยื่อ",
+            "type": "วัตถุพยาน",
+            "description": "นาฬิกาดิจิตอลที่แสดงเวลา 04:20 ถูกพบที่เกิดเหตุ",
+            "location": "บริเวณลานจอดรถ",
             "image_generation_prompt": "Close-up photo of a digital clock covered in frost. Display reads "04:20".}" // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt (make sure it include the details and align with the description)
         }
     ],
     "resolution": {
-        // ส่วนนี้จะเป็นการสรุปผลการสืบสวนและการเปิดเผยความจริง
+        // ส่วนนี้จะเป็นการสรุปผลการสืบสวนและการเปิดเผยความจริง ให้เนื้อหามีความซับซ้อนและน่าติดตาม และสร้างความตประหลาดใจให้กับผู้เล่น แต่ยังคงมีความสมเหตุสมผล
         "culprit": "ดร. อภิชาติ",
         "description": "เหยื่อถูกวางบนกล่องลิฟต์ ทำให้มีน้ำหนักที่ไม่สามารถมองเห็นได้"
     }
