@@ -69,13 +69,12 @@ services:
       - '11434:11434'
     volumes:
       - ollama-data:/root/.ollama
+    entrypoint: ["/bin/bash", "-c"]
     command: >
-      sh -c "
-        ollama serve &
-        sleep 10 &&
-        ollama pull gemma3:27b &&
-        wait
-      "
+      "ollama serve &
+       sleep 10 &&
+       ollama pull gemma3:27b &&
+       wait"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 30s
