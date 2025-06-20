@@ -8,9 +8,15 @@ import os
 import uuid
 from PIL import Image
 import asyncio
-from typing import Optional
+from typing import Optional, List
 
-app = FastAPI(title="Flux Image Generation API for Detective Game")
+app = FastAPI(
+    title="Flux Image Generation Service",
+    description="AI-powered image generation service for the niti detective game using Flux diffusion models",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 # CORS middleware
 app.add_middleware(
@@ -25,6 +31,7 @@ app.add_middleware(
 pipe = None
 
 class ImageRequest(BaseModel):
+    """Request model for image generation"""
     prompt: str
     width: Optional[int] = 512
     height: Optional[int] = 512
@@ -33,10 +40,40 @@ class ImageRequest(BaseModel):
     filename: Optional[str] = None  # Custom filename for game assets
 
 class ImageResponse(BaseModel):
+    """Response model for image generation request"""
     image_id: str
     status: str
     message: str
     filename: Optional[str] = None
+
+class StatusResponse(BaseModel):
+    """Response model for generation status"""
+    status: str
+    image_url: Optional[str] = None
+    error: Optional[str] = None
+
+class ImageListItem(BaseModel):
+    """Individual image item in list response"""
+    image_id: str
+    filename: str
+    url: str
+
+class ImageListResponse(BaseModel):
+    """Response model for image list"""
+    images: List[ImageListItem]
+
+class ClearResponse(BaseModel):
+    """Response model for clear operation"""
+    status: str
+    message: str
+
+class HealthResponse(BaseModel):
+    """Response model for health check"""
+    status: str
+    model_loaded: bool
+    service: str
+    version: str
+    gpu_available: bool
 
 # Task status tracking
 generation_tasks = {}
@@ -58,14 +95,39 @@ async def load_model():
     except Exception as e:
         print(f"Error loading model: {e}")
 
-@app.get("/health")
+@app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "model_loaded": pipe is not None}
+    """
+    Health check endpoint
+    
+    Returns the current health status of the Flux image generation service,
+    including model loading status and GPU availability.
+    """
+    return HealthResponse(
+        status="healthy",
+        model_loaded=pipe is not None,
+        service="flux-service",
+        version="1.0.0",
+        gpu_available=torch.cuda.is_available()
+    )
 
-@app.post("/generate", response_model=ImageResponse)
+@app.post("/generate", response_model=ImageResponse, tags=["Image Generation"])
 async def generate_image(request: ImageRequest, background_tasks: BackgroundTasks):
-    """Generate image from prompt"""
+    """
+    Generate image from text prompt
+    
+    Creates AI-generated images using the Flux diffusion model.
+    Perfect for generating character portraits and evidence images
+    for the detective game.
+    
+    Parameters:
+    - **prompt**: Text description of the image to generate
+    - **width**: Image width in pixels (default: 512)
+    - **height**: Image height in pixels (default: 512)
+    - **num_inference_steps**: Number of denoising steps (default: 20)
+    - **guidance_scale**: How closely to follow the prompt (default: 7.5)
+    - **filename**: Custom filename for the generated image (optional)
+    """
     if pipe is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
     
@@ -131,9 +193,15 @@ async def generate_image_task(
         print(f"Error generating image {image_id}: {e}")
         generation_tasks[image_id] = {"status": "failed", "error": str(e)}
 
-@app.get("/image/{image_id}")
+@app.get("/image/{image_id}", tags=["Image Retrieval"])
 async def get_image(image_id: str):
-    """Get generated image by ID"""
+    """
+    Get generated image by ID
+    
+    Returns the actual image file for the given image ID.
+    Used to retrieve character portraits, evidence images,
+    and other generated assets for the detective game.
+    """
     image_path = f"/app/outputs/{image_id}.png"
     
     if not os.path.exists(image_path):
@@ -141,36 +209,48 @@ async def get_image(image_id: str):
     
     return FileResponse(image_path, media_type="image/png")
 
-@app.get("/status/{image_id}")
+@app.get("/status/{image_id}", response_model=StatusResponse, tags=["Image Generation"])
 async def get_status(image_id: str):
-    """Get generation status by ID"""
+    """
+    Get generation status by image ID
+    
+    Check the current status of an image generation task.
+    Returns one of: processing, completed, failed, or not_found.
+    For completed images, includes the URL to retrieve the image.
+    """
     if image_id not in generation_tasks:
         # Check if file exists
         image_path = f"/app/outputs/{image_id}.png"
         if os.path.exists(image_path):
-            return {"status": "completed", "image_url": f"/image/{image_id}"}
+            return StatusResponse(status="completed", image_url=f"/image/{image_id}")
         else:
-            return {"status": "not_found"}
+            return StatusResponse(status="not_found")
     
     task_status = generation_tasks[image_id]
     
     if task_status["status"] == "completed":
-        return {
-            "status": "completed", 
-            "image_url": f"/image/{image_id}",
-            "error": None
-        }
+        return StatusResponse(
+            status="completed", 
+            image_url=f"/image/{image_id}",
+            error=None
+        )
     elif task_status["status"] == "failed":
-        return {
-            "status": "failed",
-            "error": task_status["error"]
-        }
+        return StatusResponse(
+            status="failed",
+            error=task_status["error"]
+        )
     else:
-        return {"status": "processing"}
+        return StatusResponse(status="processing")
 
-@app.delete("/clear")
+@app.delete("/clear", response_model=ClearResponse, tags=["Image Management"])
 async def clear_images():
-    """Clear all generated images (for game restart)"""
+    """
+    Clear all generated images
+    
+    Removes all generated images from storage and clears
+    the generation task status. Used when restarting
+    the detective game or cleaning up storage.
+    """
     try:
         output_dir = "/app/outputs"
         if os.path.exists(output_dir):
@@ -181,29 +261,35 @@ async def clear_images():
         # Clear task status
         generation_tasks.clear()
         
-        return {"status": "cleared", "message": "All images cleared"}
+        return ClearResponse(status="cleared", message="All images cleared")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to clear images: {e}")
 
-@app.get("/list")
+@app.get("/list", response_model=ImageListResponse, tags=["Image Management"])
 async def list_images():
-    """List all generated images"""
+    """
+    List all generated images
+    
+    Returns a list of all currently stored images
+    with their IDs, filenames, and URLs for retrieval.
+    Useful for debugging and asset management.
+    """
     try:
         output_dir = "/app/outputs"
         if not os.path.exists(output_dir):
-            return {"images": []}
+            return ImageListResponse(images=[])
         
         images = []
         for filename in os.listdir(output_dir):
             if filename.endswith(".png"):
                 image_id = filename[:-4]  # Remove .png extension
-                images.append({
-                    "image_id": image_id,
-                    "filename": filename,
-                    "url": f"/image/{image_id}"
-                })
+                images.append(ImageListItem(
+                    image_id=image_id,
+                    filename=filename,
+                    url=f"/image/{image_id}"
+                ))
         
-        return {"images": images}
+        return ImageListResponse(images=images)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list images: {e}")
 
