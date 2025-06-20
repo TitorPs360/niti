@@ -237,10 +237,10 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 
 {
     "situation": {
-        // ส่วนนี้จะเป็นการแนะนำสถานการณ์ก่อนเกิดเหตุและสถานที่เกิดเหตุการณ์
+        // ส่วนนี้จะเป็นการแนะนำสถานการณ์ก่อนเกิดเหตุและสถานที่เกิดเหตุการณ์ แก้ไขชื่อ อายุ และอื่นๆ ได้ตามความเหมาะสม
         "location": "ห้องทดลองวิจัยทางวิทยาศาสตร์",
         "time": "คืนวันศุกร์ที่ผ่านมา",
-        "victim": "ดร. สมชาย",
+        "victim": "ดร. วิชัย",
         "age": "50",
         "cause_of_death": "ถูกแทงที่หน้าอก",
         "details": "The security guard pointed at the avenue direction and kept uttering 'white clothes'."
@@ -248,15 +248,15 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
     "people": [ // สร้างตัวละครโดยใช้โครงสร้างที่กำหนดไว้ดังนี้:
         // ระบุลักษณะและแรงจูงใจของตัวละคนให้ชัดเจน รวมถึงหลักฐานที่อยู่ของพวกเขาด้วย
         {
-            "name": "ดร. อภิชาติ",
-            "age": "45",
+            "name": "ดร. ณิชา วงศ์พิทักษ์",
+            "age": "25",
             "role": "นักวิทยาศาสตร์ที่มีชื่อเสียง",
             "relationship": "เพื่อนร่วมงานของเหยื่อ",
-            "characteristics": "prompt for image generation prompt ex: (A tall, elegant model with beautiful hands and a lovely face, artistically detailed makeup, wearing a long gown with a deep slit and backless dress designs, a delicate necklace with a small diamond pendant, an elegant updo hairstyle to complement the backless gown, a sparkling bracelet to enhance her elegance, and a diamond anklet or a barefoot sandal on her foot, with blonde highlights and shadow in her hair), luxury dinner room environment in the background. night time photo. (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)", // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt
+            "characteristics": "A tall, elegant model with beautiful hands and a lovely face, artistically detailed makeup, wearing a long gown with a deep slit and backless dress designs, a delicate necklace with a small diamond pendant, an elegant updo hairstyle to complement the backless gown, a sparkling bracelet to enhance her elegance, and a diamond anklet or a barefoot sandal on her foot, with blonde highlights and shadow in her hair), luxury dinner room environment in the background. night time photo. (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)", // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt
             "secret": "เขามีส่วนเกี่ยวข้องกับการทดลองผิดกฎหมายที่อาจเป็นสาเหตุของการฆาตกรรม",
             "motive": "ต้องการปกป้องชื่อเสียงและงานวิจัยของตนเอง",
             "alibi": "อยู่ในห้องทดลองตลอดคืน", // นั้นสามารถเป็นจริง หรือ เท็จก็ได้ และอาจจะขัดแย้งหรือลงตัวกับของคนอื่นก็ได้เช่นกัน รวมถึงสามารถอ้างถึงพยานยินยันที่อยู่ได้
-            "details": "เขาเป็นคนที่มีความทะเยอทะยานสูงและไม่สนใจวิธีการที่ใช้ในการบรรลุเป้าหมาย" //  จะถูกนำไปอ้างอิงเพื่อสร้างตัวละคร จะนำไปใช้กับ llm อีกตัวเพื่อแสดงเป็นการสอบสวนตัวละครตัวนั้นๆ จึงต้องระบุอย่างชัดเจน
+            "details": "เธอเป็นคนที่มีความทะเยอทะยานสูงและไม่สนใจวิธีการที่ใช้ในการบรรลุเป้าหมาย" //  จะถูกนำไปอ้างอิงเพื่อสร้างตัวละคร จะนำไปใช้กับ llm อีกตัวเพื่อแสดงเป็นการสอบสวนตัวละครตัวนั้นๆ จึงต้องระบุอย่างชัดเจน
         }
     ],
     "evidence": [
@@ -265,7 +265,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "type": "DNA",
             "description": "พบ DNA ของผู้ต้องสงสัยที่เกิดเหตุ",
             "location": "บนเสื้อผ้าของเหยื่อ",
-            "image_generation_prompt": "prompt for image generation make sure it include the details and align with the description ex: Close-up photo of a digital clock covered in frost. Display reads "04:20".}" // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt
+            "image_generation_prompt": "Close-up photo of a digital clock covered in frost. Display reads "04:20".}" // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt (make sure it include the details and align with the description)
         }
     ],
     "resolution": {
