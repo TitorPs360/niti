@@ -212,6 +212,12 @@ async def generate_game_content(game_id: str, custom_prompt: Optional[str]):
         # Generate evidence images
         await generate_evidence_images(script["evidence"], game_id)
         
+        # Wait for all image generation to complete
+        await wait_for_all_images_complete(script)
+        
+        # Unload Flux model to free memory
+        await unload_flux_model()
+        
         game_state["current_state"] = "playing"
         game_state["script_generated"] = True
         game_state["assets_generated"] = True
@@ -229,13 +235,50 @@ async def generate_script(custom_prompt: Optional[str]) -> Dict:
     default_prompt = """สร้างบทหนังสืบสวนคดีฆาตรกรรมที่มีความซับซ้อนและน่าติดตาม โดยมีตัวละครหลายตัวที่มีความลับและแรงจูงใจที่แตกต่างกัน เพื่อนำไปใช้เป็นบทของเกมสิบสวน
 โดยอ้างอิงจากโครงสร้างที่กำหนดไว้ดังนี้:
 
-สร้างโครงสร้าง JSON ที่มี:
-1. situation: {location, time, victim, age, cause_of_death, details}
-2. people: array ของตัวละคร โดยแต่ละตัวมี {name, age, role, relationship, characteristics (สำหรับสร้างภาพ), secret, motive, alibi, details}
-3. evidence: array ของหลักฐาน โดยแต่ละอันมี {type, description, location, image_generation_prompt}
-4. resolution: {culprit, description}
+{
+    "situation": {
+        // ส่วนนี้จะเป็นการแนะนำสถานการณ์ก่อนเกิดเหตุและสถานที่เกิดเหตุการณ์
+        "location": "ห้องทดลองวิจัยทางวิทยาศาสตร์",
+        "time": "คืนวันศุกร์ที่ผ่านมา",
+        "victim": "ดร. สมชาย",
+        "age": "50",
+        "cause_of_death": "ถูกแทงที่หน้าอก",
+        "details": "The security guard pointed at the avenue direction and kept uttering 'white clothes'."
+    },
+    "people": [ // สร้างตัวละครโดยใช้โครงสร้างที่กำหนดไว้ดังนี้:
+        // ระบุลักษณะและแรงจูงใจของตัวละคนให้ชัดเจน รวมถึงหลักฐานที่อยู่ของพวกเขาด้วย
+        {
+            "name": "ดร. อภิชาติ",
+            "age": "45",
+            "role": "นักวิทยาศาสตร์ที่มีชื่อเสียง",
+            "relationship": "เพื่อนร่วมงานของเหยื่อ",
+            "characteristics": "{for image generation prompt ex: (A tall, elegant model with beautiful hands and a lovely face, artistically detailed makeup, wearing a long gown with a deep slit and backless dress designs, a delicate necklace with a small diamond pendant, an elegant updo hairstyle to complement the backless gown, a sparkling bracelet to enhance her elegance, and a diamond anklet or a barefoot sandal on her foot, with blonde highlights and shadow in her hair), luxury dinner room environment in the background. night time photo. (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)}",
+            "secret": "เขามีส่วนเกี่ยวข้องกับการทดลองผิดกฎหมายที่อาจเป็นสาเหตุของการฆาตกรรม",
+            "motive": "ต้องการปกป้องชื่อเสียงและงานวิจัยของตนเอง",
+            "alibi": "อยู่ในห้องทดลองตลอดคืน", // นั้นสามารถเป็นจริง หรือ เท็จก็ได้ และอาจจะขัดแย้งหรือลงตัวกับของคนอื่นก็ได้เช่นกัน รวมถึงสามารถอ้างถึงพยานยินยันที่อยู่ได้
+            "details": "เขาเป็นคนที่มีความทะเยอทะยานสูงและไม่สนใจวิธีการที่ใช้ในการบรรลุเป้าหมาย" //  จะถูกนำไปอ้างอิงเพื่อสร้างตัวละคร จะนำไปใช้กับ llm อีกตัวเพื่อแสดงเป็นการสอบสวนตัวละครตัวนั้นๆ จึงต้องระบุอย่างชัดเจน
+        }
+    ],
+    "evidence": [
+        // สร้างหลักฐานที่เกี่ยวข้องกับคดีนี้ โดยใช้โครงสร้างที่กำหนด
+        {
+            "type": "DNA",
+            "description": "พบ DNA ของผู้ต้องสงสัยที่เกิดเหตุ",
+            "location": "บนเสื้อผ้าของเหยื่อ",
+            "image_generation_prompt": "{prompt for image generation make sure it include the details and align with the description ex: Close-up photo of a digital clock covered in frost. Display reads "04:20".}"
+        }
+    ],
+    "resolution": {
+        // ส่วนนี้จะเป็นการสรุปผลการสืบสวนและการเปิดเผยความจริง
+        "culprit": "ดร. อภิชาติ",
+        "description": "เหยื่อถูกวางบนกล่องลิฟต์ ทำให้มีน้ำหนักที่ไม่สามารถมองเห็นได้"
+    }
+}
 
-ตอบกลับเป็น JSON ที่ถูกต้องเท่านั้น ไม่ต้องมีคำอธิบายเพิ่มเติม"""
+เหตุการณ์และตัวละครทั้งหมดด้านบนเป็นเพียงตัวอย่าง คุณสามารถสร้างตัวละครและเหตุการณ์เพิ่มเติมได้ตามต้องการ
+เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐาน และสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
+
+*GIVEN ME A VALID JSON FORMAT*"""
     
     prompt = custom_prompt if custom_prompt else default_prompt
     
@@ -307,6 +350,82 @@ async def request_image_generation(prompt: str, filename: str) -> str:
             result = await response.json()
             return result["image_id"]
 
+async def wait_for_all_images_complete(script: Dict):
+    """Wait for all image generation tasks to complete"""
+    image_ids = []
+    
+    # Collect all image IDs from characters
+    for person in script.get("people", []):
+        if "image_id" in person:
+            image_ids.append(person["image_id"])
+    
+    # Collect all image IDs from evidence
+    for evidence in script.get("evidence", []):
+        if "image_id" in evidence:
+            image_ids.append(evidence["image_id"])
+    
+    print(f"Waiting for {len(image_ids)} images to complete generation...")
+    
+    # Wait for all images to complete
+    max_wait_time = 300  # 5 minutes max wait
+    check_interval = 5   # Check every 5 seconds
+    waited_time = 0
+    
+    while waited_time < max_wait_time:
+        all_complete = True
+        
+        async with aiohttp.ClientSession() as session:
+            for image_id in image_ids:
+                async with session.get(f"http://flux-service:8000/status/{image_id}") as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        if result["status"] not in ["completed", "failed"]:
+                            all_complete = False
+                            break
+                    else:
+                        all_complete = False
+                        break
+        
+        if all_complete:
+            print("All images completed generation")
+            break
+        
+        print(f"Still waiting for images to complete... ({waited_time}s/{max_wait_time}s)")
+        await asyncio.sleep(check_interval)
+        waited_time += check_interval
+    
+    if waited_time >= max_wait_time:
+        print("Warning: Some images may not have completed generation")
+
+async def unload_flux_model():
+    """Unload Flux model from memory to free up resources"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post("http://flux-service:8000/unload") as response:
+                if response.status == 200:
+                    result = await response.json()
+                    print(f"Flux model unloading: {result['message']}")
+                else:
+                    print(f"Failed to unload Flux model: HTTP {response.status}")
+    except Exception as e:
+        print(f"Error unloading Flux model: {e}")
+
+async def reload_flux_model():
+    """Reload Flux model for additional image generation"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post("http://flux-service:8000/reload") as response:
+                if response.status == 200:
+                    result = await response.json()
+                    print(f"Flux model reloading: {result['message']}")
+                    return True
+                else:
+                    print(f"Failed to reload Flux model: HTTP {response.status}")
+                    return False
+    except Exception as e:
+        print(f"Error reloading Flux model: {e}")
+        return False
+
 @app.post("/api/game/restart", response_model=RestartResponse, tags=["Game Management"])
 async def restart_game():
     """
@@ -342,6 +461,31 @@ async def restart_game():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to restart game: {e}")
+
+@app.post("/api/flux/unload", tags=["Model Management"])
+async def manual_unload_flux():
+    """
+    Manually unload Flux model to free memory
+    
+    Useful for freeing GPU memory when not actively generating images.
+    The model will be automatically reloaded when needed for new games.
+    """
+    await unload_flux_model()
+    return {"status": "success", "message": "Flux model unload requested"}
+
+@app.post("/api/flux/reload", tags=["Model Management"])
+async def manual_reload_flux():
+    """
+    Manually reload Flux model for image generation
+    
+    Pre-loads the model into memory for faster image generation.
+    This is automatically done when starting new games if needed.
+    """
+    success = await reload_flux_model()
+    if success:
+        return {"status": "success", "message": "Flux model reload requested"}
+    else:
+        return {"status": "error", "message": "Failed to reload Flux model"}
 
 @app.get("/api/game/script/{game_id}", response_model=GameScript, tags=["Game Content"])
 async def get_game_script(game_id: str):
