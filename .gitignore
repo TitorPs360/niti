@@ -1,3 +1,7 @@
 .env
+
+assets
+game_data
+
 models
 ollama_data
