@@ -252,7 +252,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "45",
             "role": "นักวิทยาศาสตร์ที่มีชื่อเสียง",
             "relationship": "เพื่อนร่วมงานของเหยื่อ",
-            "characteristics": "{for image generation prompt ex: (A tall, elegant model with beautiful hands and a lovely face, artistically detailed makeup, wearing a long gown with a deep slit and backless dress designs, a delicate necklace with a small diamond pendant, an elegant updo hairstyle to complement the backless gown, a sparkling bracelet to enhance her elegance, and a diamond anklet or a barefoot sandal on her foot, with blonde highlights and shadow in her hair), luxury dinner room environment in the background. night time photo. (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)}",
+            "characteristics": "prompt for image generation prompt ex: (A tall, elegant model with beautiful hands and a lovely face, artistically detailed makeup, wearing a long gown with a deep slit and backless dress designs, a delicate necklace with a small diamond pendant, an elegant updo hairstyle to complement the backless gown, a sparkling bracelet to enhance her elegance, and a diamond anklet or a barefoot sandal on her foot, with blonde highlights and shadow in her hair), luxury dinner room environment in the background. night time photo. (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)", // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt
             "secret": "เขามีส่วนเกี่ยวข้องกับการทดลองผิดกฎหมายที่อาจเป็นสาเหตุของการฆาตกรรม",
             "motive": "ต้องการปกป้องชื่อเสียงและงานวิจัยของตนเอง",
             "alibi": "อยู่ในห้องทดลองตลอดคืน", // นั้นสามารถเป็นจริง หรือ เท็จก็ได้ และอาจจะขัดแย้งหรือลงตัวกับของคนอื่นก็ได้เช่นกัน รวมถึงสามารถอ้างถึงพยานยินยันที่อยู่ได้
@@ -265,7 +265,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "type": "DNA",
             "description": "พบ DNA ของผู้ต้องสงสัยที่เกิดเหตุ",
             "location": "บนเสื้อผ้าของเหยื่อ",
-            "image_generation_prompt": "{prompt for image generation make sure it include the details and align with the description ex: Close-up photo of a digital clock covered in frost. Display reads "04:20".}"
+            "image_generation_prompt": "prompt for image generation make sure it include the details and align with the description ex: Close-up photo of a digital clock covered in frost. Display reads "04:20".}" // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt
         }
     ],
     "resolution": {
