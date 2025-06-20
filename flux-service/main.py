@@ -92,8 +92,7 @@ async def load_model():
         print("Loading Flux model...")
         pipe = FluxPipeline.from_pretrained(
             "black-forest-labs/FLUX.1-dev",  # Using dev model as requested
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto" if torch.cuda.is_available() else None
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
         )
         if torch.cuda.is_available():
             pipe = pipe.to("cuda")
@@ -370,8 +369,7 @@ async def reload_model():
         print("Reloading Flux model...")
         pipe = FluxPipeline.from_pretrained(
             "black-forest-labs/FLUX.1-dev",
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto" if torch.cuda.is_available() else None
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
         )
         if torch.cuda.is_available():
             pipe = pipe.to("cuda")
