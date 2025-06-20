@@ -1,4 +1,4 @@
-import { GameState, GameScript, ChatResponse, ChatMessage, Character } from '../types/game';
+import { GameState, GameScript, ChatResponse, ChatMessage, Character, DeductionRequest, DeductionResponse } from '../types/game';
 
 const API_BASE = 'http://localhost:8001/api';
 
@@ -138,6 +138,22 @@ export class GameAPI {
     
     if (!response.ok) {
       throw new Error(`Clear chat history failed: ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+
+  static async submitDeduction(deduction: DeductionRequest): Promise<DeductionResponse> {
+    const response = await fetch(`${API_BASE}/game/submit-deduction`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(deduction),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Submit deduction failed: ${response.statusText}`);
     }
     
     return response.json();

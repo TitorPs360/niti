@@ -4,6 +4,7 @@ import { CharacterCard } from './CharacterCard';
 import { EvidenceCard } from './EvidenceCard';
 import { ChatInterface } from './ChatInterface';
 import { DebugPanel } from './DebugPanel';
+import { DeductionModal } from './DeductionModal';
 import { GameAPI } from '../services/api';
 
 interface GameBoardProps {
@@ -21,6 +22,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'characters' | 'evidence'>('overview');
+  const [showDeductionModal, setShowDeductionModal] = useState(false);
 
   // Debug logging
   useEffect(() => {
@@ -53,6 +55,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   const handleCloseChat = () => {
     setSelectedCharacter(null);
+  };
+
+  const handleSolveCase = () => {
+    setShowDeductionModal(true);
+  };
+
+  const handleCloseDeduction = () => {
+    setShowDeductionModal(false);
   };
 
   const TabButton = ({ tab, label, count }: { tab: string; label: string; count?: number }) => (
@@ -91,12 +101,20 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 {gameScript.situation.location} • {gameScript.situation.time}
               </p>
             </div>
-            <button
-              onClick={onRestart}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
-            >
-              เริ่มเกมใหม่
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={handleSolveCase}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
+              >
+                สรุปคดี
+              </button>
+              <button
+                onClick={onRestart}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200"
+              >
+                เริ่มเกมใหม่
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -178,6 +196,20 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Solve Case Call-to-Action */}
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg shadow-md p-6 text-white">
+              <h3 className="text-lg font-semibold mb-3">พร้อมสรุปคดีแล้ว?</h3>
+              <p className="mb-4 text-orange-100">
+                เมื่อคุณรวบรวมหลักฐานและสอบสวนตัวละครครบถ้วนแล้ว สามารถสรุปคดีได้
+              </p>
+              <button
+                onClick={handleSolveCase}
+                className="bg-white text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-md font-medium transition duration-200"
+              >
+                🔍 สรุปคดีและระบุผู้กระทำผิด
+              </button>
+            </div>
           </div>
         )}
 
@@ -228,6 +260,29 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           gameId={gameId}
           onClose={handleCloseChat}
         />
+      )}
+
+      {/* Deduction Modal */}
+      {showDeductionModal && (
+        <DeductionModal
+          gameId={gameId}
+          characters={gameScript.people}
+          onClose={handleCloseDeduction}
+          onRestart={onRestart}
+        />
+      )}
+
+      {/* Floating Solve Case Button */}
+      {activeTab !== 'overview' && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={handleSolveCase}
+            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-3 rounded-full shadow-lg font-medium transition duration-200 flex items-center space-x-2"
+          >
+            <span>🔍</span>
+            <span>สรุปคดี</span>
+          </button>
+        </div>
       )}
 
       {/* Debug Panel */}

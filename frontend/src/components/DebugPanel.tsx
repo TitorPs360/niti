@@ -13,7 +13,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ gameScript, gameId, onFo
   if (!gameScript) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 left-4 z-50">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-md text-sm font-medium shadow-lg"
@@ -22,7 +22,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ gameScript, gameId, onFo
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-12 right-0 w-96 max-h-96 bg-white border border-gray-300 rounded-lg shadow-xl overflow-auto">
+        <div className="absolute bottom-12 left-0 w-96 max-h-96 bg-white border border-gray-300 rounded-lg shadow-xl overflow-auto">
           <div className="p-4">
             <h3 className="font-semibold text-gray-800 mb-3">Debug Information</h3>
             

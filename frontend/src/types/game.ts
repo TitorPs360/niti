@@ -55,4 +55,17 @@ export interface ChatResponse {
   timestamp: string;
 }
 
+export interface DeductionRequest {
+  game_id: string;
+  culprit: string;
+  reasoning: string;
+}
+
+export interface DeductionResponse {
+  correct: boolean;
+  score: number;
+  judgment: string;
+  actual_culprit: string;
+}
+
 export type GamePhase = 'setup' | 'setting_up' | 'ready' | 'generating' | 'playing' | 'setup_error' | 'generation_error';

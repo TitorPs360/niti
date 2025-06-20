@@ -104,6 +104,19 @@ class ChatHistoryResponse(BaseModel):
     character_name: str
     messages: List[ChatMessage]
 
+class DeductionRequest(BaseModel):
+    """Request model for deduction submission"""
+    game_id: str
+    culprit: str
+    reasoning: str
+
+class DeductionResponse(BaseModel):
+    """Response model for deduction submission"""
+    correct: bool
+    score: int  # 0-100
+    judgment: str
+    actual_culprit: str
+
 def ensure_directories():
     """Ensure required directories exist"""
     os.makedirs(GAME_DATA_DIR, exist_ok=True)
@@ -629,6 +642,142 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
             result = await response.json()
             return result["response"].strip()
 
+async def generate_deduction_judgment(script: Dict, guessed_culprit: str, reasoning: str, is_correct: bool) -> str:
+    """Generate AI judgment of player's deduction"""
+    
+    # Gather case information
+    situation = script.get("situation", {})
+    people = script.get("people", [])
+    evidence = script.get("evidence", [])
+    resolution = script.get("resolution", {})
+    
+    # Build character info
+    character_info = "\n".join([
+        f"- {person.get('name', '')}: {person.get('role', '')} - {person.get('relationship', '')}"
+        for person in people
+    ])
+    
+    # Build evidence info
+    evidence_info = "\n".join([
+        f"- {item.get('type', '')}: {item.get('description', '')} (พบที่: {item.get('location', '')})"
+        for item in evidence
+    ])
+    
+    if is_correct:
+        prompt = f"""คุณเป็นผู้พิพากษาในเกมสืบสวนคดีฆาตกรรม ผู้เล่นได้ทายผู้ต้องสงสัยถูกต้องแล้ว
+
+ข้อมูลคดี:
+สถานที่: {situation.get('location', '')}
+เหยื่อ: {situation.get('victim', '')}
+สาเหตุการตาย: {situation.get('cause_of_death', '')}
+
+ตัวละคร:
+{character_info}
+
+หลักฐาน:
+{evidence_info}
+
+ผู้กระทำผิดจริง: {resolution.get('culprit', '')}
+การตายจริง: {resolution.get('description', '')}
+
+การทายของผู้เล่น: {guessed_culprit}
+เหตุผลของผู้เล่น: {reasoning}
+
+ผู้เล่นทายถูกต้อง! โปรดให้คำตัดสินที่ชื่นชมและวิเคราะห์เหตุผลของผู้เล่น ใช้ภาษาไทยที่สุภาพและให้กำลังใจ (ไม่เกิน 150 คำ)"""
+    else:
+        prompt = f"""คุณเป็นผู้พิพากษาในเกมสืบสวนคดีฆาตกรรม ผู้เล่นได้ทายผู้ต้องสงสัยผิด
+
+ข้อมูลคดี:
+สถานที่: {situation.get('location', '')}
+เหยื่อ: {situation.get('victim', '')}
+สาเหตุการตาย: {situation.get('cause_of_death', '')}
+
+ตัวละคร:
+{character_info}
+
+หลักฐาน:
+{evidence_info}
+
+ผู้กระทำผิดจริง: {resolution.get('culprit', '')}
+การตายจริง: {resolution.get('description', '')}
+
+การทายของผู้เล่น: {guessed_culprit}
+เหตุผลของผู้เล่น: {reasoning}
+
+ผู้เล่นทายผิด โปรดให้คำตัดสินที่สุภาพและอธิบายความจริง พร้อมให้กำลังใจ ใช้ภาषาไทย (ไม่เกิน 150 คำ)"""
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            "http://ollama-service:11434/api/generate",
+            json={
+                "model": "gemma3:27b",
+                "prompt": prompt,
+                "stream": False
+            }
+        ) as response:
+            if response.status != 200:
+                return "ไม่สามารถประเมินการทายของคุณได้ในขณะนี้"
+            
+            result = await response.json()
+            return result["response"].strip()
+
+async def evaluate_reasoning_quality(script: Dict, reasoning: str) -> int:
+    """Evaluate quality of reasoning (0-30 bonus points)"""
+    
+    evidence = script.get("evidence", [])
+    people = script.get("people", [])
+    
+    # Build context for evaluation
+    evidence_info = "\n".join([
+        f"- {item.get('type', '')}: {item.get('description', '')}"
+        for item in evidence
+    ])
+    
+    character_info = "\n".join([
+        f"- {person.get('name', '')}: {person.get('secret', '')} / {person.get('motive', '')}"
+        for person in people
+    ])
+    
+    prompt = f"""ประเมินคุณภาพของการใช้เหตุผลในการสืบสวน
+
+หลักฐานที่มี:
+{evidence_info}
+
+ความลับและแรงจูงใจของตัวละคร:
+{character_info}
+
+การใช้เหตุผลของผู้เล่น: {reasoning}
+
+ให้คะแนนจาก 0-30 โดยพิจารณา:
+- การอ้างอิงหลักฐานที่ถูกต้อง (0-15 คะแนน)
+- ความสมเหตุสมผลของการวิเคราะห์ (0-15 คะแนน)
+
+ตอบเฉพาะตัวเลขคะแนนเท่านั้น (เช่น: 25)"""
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                "http://ollama-service:11434/api/generate",
+                json={
+                    "model": "gemma3:27b",
+                    "prompt": prompt,
+                    "stream": False
+                }
+            ) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    score_text = result["response"].strip()
+                    # Extract number from response
+                    import re
+                    numbers = re.findall(r'\d+', score_text)
+                    if numbers:
+                        score = int(numbers[0])
+                        return max(0, min(30, score))  # Clamp between 0-30
+                
+        return 15  # Default bonus if AI evaluation fails
+    except:
+        return 15  # Default bonus if AI evaluation fails
+
 @app.post("/api/game/chat", response_model=ChatResponse, tags=["Character Interaction"])
 async def chat_with_character(chat_request: ChatRequest):
     """
@@ -748,6 +897,49 @@ async def get_game_characters(game_id: str):
         })
     
     return {"characters": characters}
+
+@app.post("/api/game/submit-deduction", response_model=DeductionResponse, tags=["Game Management"])
+async def submit_deduction(deduction_request: DeductionRequest):
+    """
+    Submit deduction and get AI judgment
+    
+    Player submits their deduction about who the culprit is and their reasoning.
+    The system checks against the actual culprit and uses LLM to judge the reasoning quality.
+    """
+    if game_state["current_state"] != "playing":
+        raise HTTPException(status_code=400, detail="Game is not in playing state")
+    
+    # Get the game script
+    script_path = os.path.join(GAME_DATA_DIR, f"{deduction_request.game_id}_script.json")
+    
+    if not os.path.exists(script_path):
+        raise HTTPException(status_code=404, detail="Game script not found")
+    
+    with open(script_path, 'r', encoding='utf-8') as f:
+        script = json.load(f)
+    
+    actual_culprit = script.get("resolution", {}).get("culprit", "")
+    is_correct = deduction_request.culprit.strip().lower() == actual_culprit.strip().lower()
+    
+    # Generate AI judgment
+    judgment = await generate_deduction_judgment(
+        script, 
+        deduction_request.culprit, 
+        deduction_request.reasoning, 
+        is_correct
+    )
+    
+    # Calculate score based on correctness and reasoning quality
+    base_score = 70 if is_correct else 20
+    reasoning_bonus = await evaluate_reasoning_quality(script, deduction_request.reasoning)
+    final_score = min(100, base_score + reasoning_bonus)
+    
+    return DeductionResponse(
+        correct=is_correct,
+        score=final_score,
+        judgment=judgment,
+        actual_culprit=actual_culprit
+    )
 
 @app.get("/api/game/state", response_model=GameStateResponse, tags=["Game Management"])
 async def get_game_state():
