@@ -17,10 +17,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [characterImageUrl, setCharacterImageUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadChatHistory();
+    loadCharacterImage();
   }, [character.name, gameId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -34,6 +36,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     } catch (err) {
       console.error('Failed to load chat history:', err);
       setError('ไม่สามารถโหลดประวัติการสนทนาได้');
+    }
+  };
+
+  const loadCharacterImage = async () => {
+    if (character.image_id && !characterImageUrl) {
+      try {
+        console.log('Loading character image for chat:', character.image_id);
+        const url = await GameAPI.getGameImage(character.image_id);
+        setCharacterImageUrl(url);
+        console.log('Character image loaded for chat:', character.image_id);
+      } catch (err) {
+        console.error('Failed to load character image for chat:', err);
+      }
     }
   };
 
@@ -77,7 +92,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -97,11 +112,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 font-medium">
-                {character.name.charAt(0)}
-              </span>
-            </div>
+            {characterImageUrl ? (
+              <img
+                src={characterImageUrl}
+                alt={character.name}
+                className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-gray-600 font-medium">
+                  {character.name.charAt(0)}
+                </span>
+              </div>
+            )}
             <div>
               <h3 className="text-lg font-semibold text-gray-800">
                 {character.name}
@@ -196,7 +219,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="พิมพ์คำถามของคุณ..."
               disabled={isLoading}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Evidence } from '../types/game';
-import { GameAPI } from '../services/api';
+import { useImageLoader } from '../hooks/useImageLoader';
 
 interface EvidenceCardProps {
   evidence: Evidence;
@@ -11,21 +11,8 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
   evidence,
   onClick,
 }) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageLoading, setImageLoading] = useState(false);
+  const { imageUrl, loading: imageLoading, error: imageError, retry } = useImageLoader(evidence.image_id);
   const [showFullImage, setShowFullImage] = useState(false);
-
-  useEffect(() => {
-    if (evidence.image_id && !imageUrl) {
-      setImageLoading(true);
-      GameAPI.getGameImage(evidence.image_id)
-        .then(setImageUrl)
-        .catch((err) => {
-          console.error('Failed to load evidence image:', err);
-        })
-        .finally(() => setImageLoading(false));
-    }
-  }, [evidence.image_id, imageUrl]);
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,9 +37,13 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
                 alt={evidence.type}
                 onClick={handleImageClick}
                 className="w-20 h-20 rounded-lg object-cover border border-gray-200 hover:opacity-80 transition-opacity cursor-zoom-in"
+                onError={() => {
+                  console.error('Evidence image failed to load in img element:', evidence.image_id);
+                  retry();
+                }}
               />
             ) : (
-              <div className="w-20 h-20 bg-gray-300 rounded-lg flex items-center justify-center">
+              <div className="w-20 h-20 bg-gray-300 rounded-lg flex items-center justify-center relative">
                 <svg
                   className="w-8 h-8 text-gray-500"
                   fill="none"
@@ -66,6 +57,18 @@ export const EvidenceCard: React.FC<EvidenceCardProps> = ({
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
+                {evidence.image_id && imageError && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      retry();
+                    }}
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                    title="Retry loading image"
+                  >
+                    <span className="text-white text-xs">↻</span>
+                  </button>
+                )}
               </div>
             )}
           </div>

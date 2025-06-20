@@ -3,6 +3,7 @@ import { GameScript, Character } from '../types/game';
 import { CharacterCard } from './CharacterCard';
 import { EvidenceCard } from './EvidenceCard';
 import { ChatInterface } from './ChatInterface';
+import { DebugPanel } from './DebugPanel';
 import { GameAPI } from '../services/api';
 
 interface GameBoardProps {
@@ -18,6 +19,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 }) => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'characters' | 'evidence'>('overview');
+
+  // Debug logging
+  useEffect(() => {
+    console.log('GameBoard received gameScript:', gameScript);
+    console.log('Characters:', gameScript.people);
+    console.log('Evidence:', gameScript.evidence);
+    gameScript.people.forEach((character, index) => {
+      console.log(`Character ${index}:`, character.name, 'image_id:', character.image_id);
+    });
+    gameScript.evidence.forEach((evidence, index) => {
+      console.log(`Evidence ${index}:`, evidence.type, 'image_id:', evidence.image_id);
+    });
+  }, [gameScript]);
   useEffect(() => {
     loadCharacters();
   }, [gameId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -213,6 +227,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           onClose={handleCloseChat}
         />
       )}
+
+      {/* Debug Panel */}
+      <DebugPanel gameScript={gameScript} gameId={gameId} />
     </div>
   );
 };

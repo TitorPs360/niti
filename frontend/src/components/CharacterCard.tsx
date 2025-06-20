@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Character } from '../types/game';
-import { GameAPI } from '../services/api';
+import { useImageLoader } from '../hooks/useImageLoader';
 
 interface CharacterCardProps {
   character: Character;
@@ -13,20 +13,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
   onClick,
   isSelected = false,
 }) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [imageLoading, setImageLoading] = useState(false);
-
-  useEffect(() => {
-    if (character.image_id && !imageUrl) {
-      setImageLoading(true);
-      GameAPI.getGameImage(character.image_id)
-        .then(setImageUrl)
-        .catch((err) => {
-          console.error('Failed to load character image:', err);
-        })
-        .finally(() => setImageLoading(false));
-    }
-  }, [character.image_id, imageUrl]);
+  const { imageUrl, loading: imageLoading, error: imageError, retry } = useImageLoader(character.image_id);
 
   return (
     <div
@@ -47,12 +34,28 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
               src={imageUrl}
               alt={character.name}
               className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+              onError={() => {
+                console.error('Image failed to load in img element:', character.image_id);
+                retry();
+              }}
             />
           ) : (
-            <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center relative">
               <span className="text-gray-600 text-lg font-medium">
                 {character.name.charAt(0)}
               </span>
+              {character.image_id && imageError && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    retry();
+                  }}
+                  className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                  title="Retry loading image"
+                >
+                  <span className="text-white text-xs">↻</span>
+                </button>
+              )}
             </div>
           )}
         </div>
