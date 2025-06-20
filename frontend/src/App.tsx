@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGameState } from './hooks/useGameState';
 import { GameSetup } from './components/GameSetup';
 import { GameBoard } from './components/GameBoard';
@@ -13,6 +12,7 @@ function App() {
     setupGame,
     startGame,
     restartGame,
+    forceReloadScript,
     phase,
   } = useGameState();
 
@@ -23,6 +23,7 @@ function App() {
         gameScript={gameScript}
         gameId={gameState.current_game}
         onRestart={restartGame}
+        onForceReloadScript={forceReloadScript}
       />
     );
   }

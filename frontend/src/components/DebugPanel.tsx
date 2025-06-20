@@ -4,9 +4,10 @@ import { GameScript } from '../types/game';
 interface DebugPanelProps {
   gameScript: GameScript | null;
   gameId: string | null;
+  onForceReload?: () => void;
 }
 
-export const DebugPanel: React.FC<DebugPanelProps> = ({ gameScript, gameId }) => {
+export const DebugPanel: React.FC<DebugPanelProps> = ({ gameScript, gameId, onForceReload }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!gameScript) return null;
@@ -67,6 +68,17 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ gameScript, gameId }) =>
                   <div>Images: GET /game/image/{'<image_id>'}</div>
                 </div>
               </div>
+              
+              {onForceReload && (
+                <div>
+                  <button
+                    onClick={onForceReload}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded"
+                  >
+                    Force Reload Script
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

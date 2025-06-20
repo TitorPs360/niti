@@ -10,12 +10,14 @@ interface GameBoardProps {
   gameScript: GameScript;
   gameId: string;
   onRestart: () => void;
+  onForceReloadScript?: () => void;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
   gameScript,
   gameId,
   onRestart,
+  onForceReloadScript,
 }) => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'characters' | 'evidence'>('overview');
@@ -229,7 +231,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       )}
 
       {/* Debug Panel */}
-      <DebugPanel gameScript={gameScript} gameId={gameId} />
+      <DebugPanel gameScript={gameScript} gameId={gameId} onForceReload={onForceReloadScript} />
     </div>
   );
 };

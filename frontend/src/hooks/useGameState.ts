@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState, GameScript, GamePhase } from '../types/game';
 import { GameAPI } from '../services/api';
 
@@ -13,20 +13,50 @@ export const useGameState = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Use refs to avoid stale closure issues
+  const gameStateRef = useRef(gameState);
+  const gameScriptRef = useRef(gameScript);
+  
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+  
+  useEffect(() => {
+    gameScriptRef.current = gameScript;
+  }, [gameScript]);
+
   const pollGameState = useCallback(async () => {
     try {
       const state = await GameAPI.getGameState();
+      const prevState = gameStateRef.current.current_state;
       setGameState(state);
       
-      // If game script is ready and we haven't loaded it yet
-      if (state.current_game && state.script_generated && !gameScript) {
-        const script = await GameAPI.getGameScript(state.current_game);
-        setGameScript(script);
+      // Load script when it's ready or when game transitions to playing state
+      if (state.current_game && state.script_generated) {
+        // Reload script if we don't have one, or if state just changed to "playing"
+        const shouldReloadScript = !gameScriptRef.current || 
+          (prevState !== 'playing' && state.current_state === 'playing');
+        
+        if (shouldReloadScript) {
+          console.log('Loading game script:', state.current_game, 'state:', state.current_state, 'prevState:', prevState);
+          const script = await GameAPI.getGameScript(state.current_game);
+          console.log('Loaded script with characters:', script.people?.length, 'evidence:', script.evidence?.length);
+          
+          // Log image_ids for debugging
+          script.people?.forEach((char, i) => {
+            console.log(`Character ${i} (${char.name}):`, char.image_id ? `image_id: ${char.image_id}` : 'no image_id');
+          });
+          script.evidence?.forEach((ev, i) => {
+            console.log(`Evidence ${i} (${ev.type}):`, ev.image_id ? `image_id: ${ev.image_id}` : 'no image_id');
+          });
+          
+          setGameScript(script);
+        }
       }
     } catch (err) {
       console.error('Failed to poll game state:', err);
     }
-  }, [gameScript]);
+  }, []);
 
   useEffect(() => {
     // Initial state fetch
@@ -85,6 +115,19 @@ export const useGameState = () => {
     pollGameState();
   }, [pollGameState]);
 
+  const forceReloadScript = useCallback(async () => {
+    if (gameStateRef.current.current_game && gameStateRef.current.script_generated) {
+      console.log('Force reloading script...');
+      try {
+        const script = await GameAPI.getGameScript(gameStateRef.current.current_game);
+        console.log('Force loaded script with characters:', script.people?.length, 'evidence:', script.evidence?.length);
+        setGameScript(script);
+      } catch (err) {
+        console.error('Failed to force reload script:', err);
+      }
+    }
+  }, []);
+
   return {
     gameState,
     gameScript,
@@ -94,6 +137,7 @@ export const useGameState = () => {
     startGame,
     restartGame,
     refreshState,
+    forceReloadScript,
     phase: gameState.current_state as GamePhase,
   };
 };
