@@ -75,6 +75,12 @@ class HealthResponse(BaseModel):
     version: str
     gpu_available: bool
 
+class ModelResponse(BaseModel):
+    """Response model for model operations"""
+    status: str
+    message: str
+    model_loaded: bool
+
 # Task status tracking
 generation_tasks = {}
 
@@ -292,6 +298,95 @@ async def list_images():
         return ImageListResponse(images=images)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list images: {e}")
+
+@app.post("/unload", response_model=ModelResponse, tags=["Model Management"])
+async def unload_model():
+    """
+    Unload the Flux model from memory
+    
+    Removes the Flux model from GPU/CPU memory to free up resources.
+    This is useful after all image generation tasks are completed
+    to reduce memory usage. The model can be reloaded later if needed.
+    """
+    global pipe
+    try:
+        if pipe is not None:
+            # Move model to CPU first if it was on GPU
+            if torch.cuda.is_available() and next(pipe.unet.parameters()).is_cuda:
+                pipe = pipe.to("cpu")
+            
+            # Clear CUDA cache
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            
+            # Delete the pipeline
+            del pipe
+            pipe = None
+            
+            # Force garbage collection
+            import gc
+            gc.collect()
+            
+            # Additional CUDA cleanup
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
+            
+            return ModelResponse(
+                status="success",
+                message="Model unloaded successfully, memory freed",
+                model_loaded=False
+            )
+        else:
+            return ModelResponse(
+                status="info",
+                message="Model was not loaded",
+                model_loaded=False
+            )
+    except Exception as e:
+        return ModelResponse(
+            status="error",
+            message=f"Failed to unload model: {e}",
+            model_loaded=pipe is not None
+        )
+
+@app.post("/reload", response_model=ModelResponse, tags=["Model Management"])
+async def reload_model():
+    """
+    Reload the Flux model into memory
+    
+    Loads the Flux model back into GPU/CPU memory after it has been unloaded.
+    This allows the service to resume image generation capabilities.
+    """
+    global pipe
+    try:
+        if pipe is not None:
+            return ModelResponse(
+                status="info",
+                message="Model is already loaded",
+                model_loaded=True
+            )
+        
+        print("Reloading Flux model...")
+        pipe = FluxPipeline.from_pretrained(
+            "black-forest-labs/FLUX.1-dev",
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            device_map="auto" if torch.cuda.is_available() else None
+        )
+        if torch.cuda.is_available():
+            pipe = pipe.to("cuda")
+        
+        return ModelResponse(
+            status="success",
+            message="Model reloaded successfully",
+            model_loaded=True
+        )
+    except Exception as e:
+        return ModelResponse(
+            status="error",
+            message=f"Failed to reload model: {e}",
+            model_loaded=False
+        )
 
 if __name__ == "__main__":
     import uvicorn
