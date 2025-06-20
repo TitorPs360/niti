@@ -41,20 +41,5 @@ else
     echo "assets directory does not exist, skipping..."
 fi
 
-# Clean Docker volumes that might have permission issues
-echo "🧽 Cleaning Docker volumes..."
-docker volume prune -f 2>/dev/null || echo "⚠️ Could not prune Docker volumes"
-
-# Clean ollama data if exists
-if [ -d "ollama_data" ]; then
-    echo "Cleaning ollama_data directory..."
-    find ollama_data -type f -exec rm -f {} \; 2>/dev/null || {
-        echo "Permission issue detected. Trying with elevated permissions..."
-        sudo find ollama_data -type f -exec rm -f {} \; 2>/dev/null || {
-            echo "⚠️ Could not clean ollama_data. You may need to manually run: sudo rm -rf ollama_data/*"
-        }
-    }
-fi
-
 echo "✅ Cleanup complete!"
 echo "💡 If you encountered permission issues, you may need to run: sudo ./cleanup.sh"
