@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Character, DeductionResponse } from '../types/game';
 import { GameAPI } from '../services/api';
+import { formatMarkdown } from '../utils/markdownFormatter';
 
 interface DeductionModalProps {
   gameId: string;
@@ -85,7 +86,9 @@ export const DeductionModal: React.FC<DeductionModalProps> = ({
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">ความเห็นจากผู้พิพากษา</h3>
               <div className="bg-gray-50 p-4 rounded-lg border">
-                <p className="text-gray-700 leading-relaxed">{result.judgment}</p>
+                <div className="text-gray-700 leading-relaxed">
+                  {formatMarkdown(result.judgment)}
+                </div>
               </div>
             </div>
 
