@@ -254,8 +254,8 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
     
     default_prompt = """สร้างบทหนังสืบสวนคดีฆาตรกรรมที่มีความซับซ้อนและน่าติดตาม โดยมีตัวละครหลายตัวที่มีความลับและแรงจูงใจที่แตกต่างกัน เพื่อนำไปใช้เป็นบทของเกมสืบสวน
 
-ข้อกำหนดในการสร้างเนื้อหา:
-1. ตัวละคร: สร้าง 4-6 ตัวละคร แต่ละคนต้องมีความลับที่ซับซ้อน แรงจูงใจที่หลากหลาย และข้อแก้ตัวที่อาจขัดแย้งกัน
+ข้อกำหนดในการสร้างเนื้อหา (ต้องปฏิบัติตามอย่างเคร่งครัด):
+1. ตัวละคร: สร้างตัวละคร **อย่างน้อย 4 คน แต่ไม่เกิน 6 คน** (ห้ามสร้างเพียง 3 คน) แต่ละคนต้องมีความลับที่ซับซ้อน แรงจูงใจที่หลากหลาย และข้อแก้ตัวที่อาจขัดแย้งกัน
 2. หลักฐาน: สร้าง 6-10 ชิ้นหลักฐาน แบ่งเป็น:
    - หลักฐานสำคัญ (3-4 ชิ้น): เชื่อมโยงโดยตรงกับผู้กระทำผิดและการฆาตกรรม
    - หลักฐานหลอกลวง (2-3 ชิ้น): ชี้ไปยังผู้ต้องสงสัยคนอื่นแต่เป็นเท็จ
@@ -275,13 +275,13 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         "details": "เหยื่อเป็นนักธุรกิจที่มีปฏิปักษ์มากมาย พบเสียชีวิตในห้องสูทของโรงแรม"
     },
     "people": [ 
-        // สร้างตัวละคร 4-6 คน โดยแต่ละคนต้องมีความซับซ้อน
+        // สร้างตัวละคร 4-6 คน (ต้องมีอย่างน้อย 4 คน ไม่ใช่แค่ 2-3 คน) โดยแต่ละคนต้องมีความซับซ้อน
         {
             "name": "คุณปัทมา ธนาคาร",
             "age": "38", 
             "role": "ภรรยาของเหยื่อ",
             "relationship": "คู่สมรสที่มีปัญหา",
-            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed, (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)", // ต้องเป็นภาษาอังกฤษเพื่อใช้ในการสร้างรูปภาพ
+            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed",
             "secret": "เธอมีชู้กับคนขับรถและวางแผนจะหย่าร้าง แต่กลัวว่าจะไม่ได้มรดก",
             "motive": "ต้องการเงินมรดกและเสรีภาพจากชีวิตแต่งงาน",
             "alibi": "อยู่ในห้องน้ำผู้หญิงตอนเกิดเหตุ มีสตาฟโรงแรมเห็น",
@@ -292,11 +292,33 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "29",
             "role": "เลขานุการส่วนตัว",
             "relationship": "ผู้ใต้บังคับบัญชาที่ถูกคุกคาม",
-            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style, (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)",
+            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style",
             "secret": "เธอถูกเหยื่อล่วงละเมิดทางเพศและบังคับให้ทำธุรกิจผิดกฎหมาย",
             "motive": "ต้องการแก้แค้นและหลุดพ้นจากการถูกควบคุม",
             "alibi": "อยู่ที่โต๊ะแถวหน้า พูดคุยกับแขกเข้าร่วมงาน",
             "details": "ดูเป็นคนเงียบขรึม แต่ข้างในเต็มไปด้วยความโกรธแค้น มักจะหลีกเลี่ยงการสบตากับเหยื่อ"
+        },
+        {
+            "name": "คุณวิชัย โชติกุล",
+            "age": "45",
+            "role": "หุ้นส่วนธุรกิจ",
+            "relationship": "เพื่อนร่วมงานและคู่แข่งทางธุรกิจ",
+            "characteristics": "A middle-aged Thai businessman in an expensive suit, confident posture, holding a glass of whiskey, luxury office background, professional lighting",
+            "secret": "ขโมยเงินจากบริษัทร่วมและเหยื่อกำลังจะเปิดโปง",
+            "motive": "กลัวถูกเปิดเผยการทุจริตและต้องการปกป้องการงาน",
+            "alibi": "โทรคุยธุรกิจกับลูกค้าต่างประเทศตลอดคืน",
+            "details": "ดูเป็นคนมั่นใจและน่าเชื่อถือ แต่จริงๆ แล้วเป็นคนโลภและไม่ซื่อสัตย์"
+        },
+        {
+            "name": "คุณสมหญิง วงษ์ใส",
+            "age": "52",
+            "role": "แม่บ้านประจำ",
+            "relationship": "คนใช้ที่รู้ความลับของครอบครัว",
+            "characteristics": "An elderly Thai woman in simple clothing, kind face but worried expression, holding cleaning supplies, modest home interior background",
+            "secret": "เธอเป็นพยานในการทะเลาะของเหยื่อกับภรรยาและรู้เรื่องการมีชู้",
+            "motive": "กลัวถูกไล่ออกเพราะรู้ความลับมากเกินไป",
+            "alibi": "ทำความสะอาดห้องครัวและเห็นทุกคนเข้าออก",
+            "details": "เป็นคนซื่อสัตย์แต่กลัวการเปลี่ยนแปลง รู้ความลับของทุกคนในบ้าน"
         }
     ],
     "evidence": [
@@ -349,6 +371,9 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - ข้อผิดพลาดร้อนแรง: สิ่งที่ทำให้ผู้กระทำผิดถูกจับได้
 
 เหตุการณ์และตัวละครด้านบนเป็นเพียงตัวอย่าง คุณสามารถสร้างเรื่องราวใหม่ทั้งหมดได้
+
+**สำคัญมาก: ต้องสร้างตัวละครอย่างน้อย 4 คน ห้ามสร้างเพียง 2-3 คน เด็ดขาด**
+
 เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐานและสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
 
 *GIVEN ME A VALID JSON FORMAT*"""
