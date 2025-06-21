@@ -1,6 +1,6 @@
 import { GameState, GameScript, ChatResponse, ChatMessage, Character, DeductionRequest, DeductionResponse } from '../types/game';
 
-const API_BASE = 'http://localhost:8001/api';
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:8001/api`;
 
 export class GameAPI {
   static async setupGame(ollamaModel = 'gemma3:27b') {
