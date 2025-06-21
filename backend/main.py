@@ -281,7 +281,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "38", 
             "role": "ภรรยาของเหยื่อ",
             "relationship": "คู่สมรสที่มีปัญหา",
-            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed",
+            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed", // This is a description for image generation need to be in English
             "secret": "เธอมีชู้กับคนขับรถและวางแผนจะหย่าร้าง แต่กลัวว่าจะไม่ได้มรดก",
             "motive": "ต้องการเงินมรดกและเสรีภาพจากชีวิตแต่งงาน",
             "alibi": "อยู่ในห้องน้ำผู้หญิงตอนเกิดเหตุ มีสตาฟโรงแรมเห็น",
@@ -292,7 +292,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "29",
             "role": "เลขานุการส่วนตัว",
             "relationship": "ผู้ใต้บังคับบัญชาที่ถูกคุกคาม",
-            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style",
+            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style", // This is a description for image generation need to be in English
             "secret": "เธอถูกเหยื่อล่วงละเมิดทางเพศและบังคับให้ทำธุรกิจผิดกฎหมาย",
             "motive": "ต้องการแก้แค้นและหลุดพ้นจากการถูกควบคุม",
             "alibi": "อยู่ที่โต๊ะแถวหน้า พูดคุยกับแขกเข้าร่วมงาน",
@@ -303,7 +303,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "45",
             "role": "หุ้นส่วนธุรกิจ",
             "relationship": "เพื่อนร่วมงานและคู่แข่งทางธุรกิจ",
-            "characteristics": "A middle-aged Thai businessman in an expensive suit, confident posture, holding a glass of whiskey, luxury office background, professional lighting",
+            "characteristics": "A middle-aged Thai businessman in an expensive suit, confident posture, holding a glass of whiskey, luxury office background, professional lighting", // This is a description for image generation need to be in English
             "secret": "ขโมยเงินจากบริษัทร่วมและเหยื่อกำลังจะเปิดโปง",
             "motive": "กลัวถูกเปิดเผยการทุจริตและต้องการปกป้องการงาน",
             "alibi": "โทรคุยธุรกิจกับลูกค้าต่างประเทศตลอดคืน",
@@ -314,7 +314,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "52",
             "role": "แม่บ้านประจำ",
             "relationship": "คนใช้ที่รู้ความลับของครอบครัว",
-            "characteristics": "An elderly Thai woman in simple clothing, kind face but worried expression, holding cleaning supplies, modest home interior background",
+            "characteristics": "An elderly Thai woman in simple clothing, kind face but worried expression, holding cleaning supplies, modest home interior background", // This is a description for image generation need to be in English
             "secret": "เธอเป็นพยานในการทะเลาะของเหยื่อกับภรรยาและรู้เรื่องการมีชู้",
             "motive": "กลัวถูกไล่ออกเพราะรู้ความลับมากเกินไป",
             "alibi": "ทำความสะอาดห้องครัวและเห็นทุกคนเข้าออก",
@@ -322,13 +322,13 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         }
     ],
     "evidence": [
-        // สร้างหลักฐาน 6-120ชิ้น โดยแบ่งประเภทตามความสำคัญ
+        // สร้างหลักฐาน 6-10 ชิ้น โดยแบ่งประเภทตามความสำคัญ
         {
             "type": "แก้วไวน์ที่มีร่องรอยยาพิษ",
             "description": "แก้วไวน์แดงที่พบในห้องของเหยื่อ มีร่องรอยยาพิษไซยาไนด์ ยังคงมีไวน์เหลืออยู่ครึ่งแก้ว",
             "location": "โต๊ะข้างเตียงในห้องสูท",
             "relevance": "สำคัญ",
-            "image_generation_prompt": "Close-up photo of an elegant wine glass with red wine, sitting on a marble table, dramatic lighting, crime scene photography style, high detail",
+            "image_generation_prompt": "Close-up photo of an elegant wine glass with red wine, sitting on a marble table, dramatic lighting, crime scene photography style, high detail",  // This is a description for image generation need to be in English
             "analysis": "หลักฐานหลักที่พิสูจน์วิธีการฆ่า - ยาพิษถูกผสมในไวน์"
         },
         {
@@ -336,7 +336,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "description": "จดหมายข่มขู่ที่ส่งมาให้เหยื่อเมื่อ 3 วันก่อน เขียนด้วยลายมือที่ดูเหมือนผู้หญิง",
             "location": "ในกระเป๋าเอกสารของเหยื่อ",
             "relevance": "หลอกลวง",
-            "image_generation_prompt": "Photo of a threatening letter written in Thai, feminine handwriting, on cream paper, photographed under police investigation lighting",
+            "image_generation_prompt": "Photo of a threatening letter written in Thai, feminine handwriting, on cream paper, photographed under police investigation lighting",  // This is a description for image generation need to be in English
             "analysis": "ตัวอักษรลายมือหญิงทำให้สงสัยภรรยา แต่จริงๆ แล้วเป็นการปลอมแปลง"
         },
         {
@@ -344,7 +344,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อ 2 วันก่อนเกิดเหตุ",
             "location": "ในกระเป๋าถือของเลขานุการ",
             "relevance": "สำคัญ",
-            "image_generation_prompt": "Photo of a pharmacy receipt in Thai text, showing pesticide purchase, crumpled paper texture, evidence photography style",
+            "image_generation_prompt": "Photo of a pharmacy receipt in Thai text, showing pesticide purchase, crumpled paper texture, evidence photography style",  // This is a description for image generation need to be in English
             "analysis": "พิสูจน์ว่าเลขานุการซื้อสารพิษ เป็นหลักฐานสำคัญที่ชี้ตัวผู้กระทำผิด"
         }
     ],
@@ -421,7 +421,7 @@ async def generate_character_images(people: List[Dict], game_id: str):
             filename = f"{game_id}_character_{i}_{person['name']}"
             print(f"Generating character image: {filename}")
             image_id = await request_image_generation(
-                person["characteristics"],
+                f"{person["characteristics"]}, (Portrait Photo), (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)",
                 filename
             )
             person["image_id"] = image_id
@@ -436,7 +436,7 @@ async def generate_evidence_images(evidence: List[Dict], game_id: str):
             filename = f"{game_id}_evidence_{i}_{item['type']}"
             print(f"Generating evidence image: {filename}")
             image_id = await request_image_generation(
-                item["image_generation_prompt"],
+                f"{item["image_generation_prompt"]}, (Sharp Photo:1.2) (Taken With A Canon Eos R5:0.6)",
                 filename
             )
             item["image_id"] = image_id
