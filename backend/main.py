@@ -636,6 +636,16 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
     """Generate character response using LLM"""
     character = character_context["character"]
     situation = character_context["situation"]
+    all_people = character_context["all_people"]
+    
+    # Build other characters info (excluding current character)
+    other_characters_info = ""
+    for person in all_people:
+        if person.get('name') != character['name']:
+            other_characters_info += f"""
+- {person.get('name', '')}: {person.get('role', '')} (อายุ {person.get('age', '')} ปี)
+  ความสัมพันธ์กับเหยื่อ: {person.get('relationship', '')}
+  บุคลิก: {person.get('details', '')}"""
     
     # Build conversation context
     character_info = f"""คุณคือ {character['name']} อายุ {character['age']} ปี 
@@ -652,8 +662,13 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
 เหยื่อ: {situation.get('victim', '')}
 รายละเอียด: {situation.get('details', '')}
 
+คนอื่นๆ ที่เกี่ยวข้องกับคดี:{other_characters_info}
+
 คำแนะนำในการสวมบทบาท:
 - ตอบคำถามในฐานะตัวละครนี้
+- เมื่อผู้สืบสวนถามเกี่ยวกับคนอื่น ให้ตอบตามความรู้และความสัมพันธ์ที่คุณมีกับพวกเขา
+- ถ้าคุณรู้จักคนนั้น ให้แสดงความรู้สึกและความคิดเห็นตามบุคลิกของคุณ
+- ถ้าคุณไม่รู้จักหรือไม่คุ้นเคย ให้บอกตรงๆ ว่าไม่รู้จักดี
 - รักษาความสมจริงตามบุคลิกและบทบาท
 - อาจจะเปิดเผยข้อมูลทีละน้อย หรือพยายามปกปิดความลับ
 - ตอบเป็นภาษาไทย
