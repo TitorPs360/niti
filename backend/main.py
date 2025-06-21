@@ -286,12 +286,13 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
    - อาชญากรรมในอดีต/ความยุติธรรมที่บิดเบือน
    - การเงิน/ธุรกิจ (หนี้สิน/ล้มละลาย/แบล็กเมล์)
    
-4. **หลักฐาน 6-15 ชิ้น**:
-   - ข้อมูลของหลักฐานต้องครบถ้วนตามโครงสร้างที่กำหนดไว้
-   - กายภาพ (4-5): DNA/ลายนิ้วมือปลอม/เครื่องมือฆาตกรรมที่ซับซ้อน
-   - จิตวิทยา (2-3): จดหมาย/ไดอารี่/ข้อความที่เผยจิตใจ
-   - หลอกลวง (3-4): ข้ออ้างปลอม/พยานเท็จ/ข้อมูลปลอม
-   - เทคโนโลยี (2-3): บันทึกโทร/ข้อมูลดิจิทัล/CCTV/GPS
+4. **หลักฐาน ต้องสร้าง 8-12 ชิ้นเต็ม (ห้ามน้อยกว่า 8 ชิ้น)**:
+   - **กายภาพ (3-4 ชิ้น)**: DNA/ลายนิ้วมือ/เครื่องมือฆาตกรรม/ร่องรอยการต่อสู้
+   - **จิตวิทยา (2-3 ชิ้น)**: จดหมาย/ไดอารี่/ข้อความ/รูปภาพส่วนตัว
+   - **หลอกลวง (2-3 ชิ้น)**: หลักฐานปลอม/ข้อมูลเท็จ/พยานเท็จ
+   - **เทคโนโลยี (2-3 ชิ้น)**: บันทึกโทร/CCTV/GPS/ข้อมูลคอมพิวเตอร์
+   - แต่ละชิ้นต้องมี: type, description, location, relevance, image_generation_prompt, analysis
+   - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น **NEED TO BE IN ENGLISH** เพื่อให้สามารถสร้างภาพได้
 
 5. ความสัมพันธ์: ซับซ้อนขัดแย้ง มีศัตรูหลายคน เพื่อให้โยนความผิดได้
 
@@ -345,24 +346,40 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         // เพิ่มตัวละคร 2-4 คนตามแบบ
     ],
     "evidence": [
-        // สร้างหลักฐาน 10-15 ชิ้น และข้อมูลครบถ้วนเกี่ยวกับหลักฐานแต่ละชิ้น
+        // **สำคัญ: ต้องสร้างหลักฐาน 8-12 ชิ้นครบถ้วน ตามหมวดหมู่ที่กำหนด**
         {
             "type": "แก้วไวน์ที่มีร่องรอยยาพิษ",
             "description": "แก้วไวน์แดงที่พบในห้องของเหยื่อ มีร่องรอยยาพิษไซยาไนด์",
             "location": "โต๊ะข้างเตียงในห้องสูท",
-            "relevance": "สำคัญ",
-            "image_generation_prompt": "Close-up photo of an elegant wine glass with red wine, sitting on a marble table, dramatic lighting, crime scene photography style, high detail", // This is a description for image generation need to be in English
-            "analysis": "หลักฐานหลักที่พิสูจน์วิธีการฆ่า - ยาพิษถูกผสมในไวน์"
+            "relevance": "กายภาพ",
+            "image_generation_prompt": "Close-up photo of an elegant wine glass with red wine, sitting on a marble table, dramatic lighting, crime scene photography style, high detail",
+            "analysis": "หลักฐานหลักที่พิสูจน์วิธีการฆ่า"
         },
         {
             "type": "จดหมายข่มขู่",
             "description": "จดหมายข่มขู่ลายมือหญิงส่งมา 3 วันก่อน",
             "location": "ในกระเป๋าเอกสารของเหยื่อ",
             "relevance": "หลอกลวง",
-            "image_generation_prompt": "Photo of a threatening letter written, feminine handwriting, on cream paper", // This is a description for image generation need to be in English
-            "analysis": "ตัวอักษรลายมือหญิงทำให้สงสัยภรรยา แต่จริงๆ แล้วเป็นการปลอมแปลงเพื่อใส่ร้ายภรรยา"
+            "image_generation_prompt": "Photo of a threatening letter written in Thai, feminine handwriting, on cream paper",
+            "analysis": "ลายมือปลอมเพื่อใส่ร้ายภรรยา"
+        },
+        {
+            "type": "ใบเสร็จร้านขายยา",
+            "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อ 2 วันก่อนเกิดเหตุ",
+            "location": "ในกระเป๋าถือของเลขานุการ",
+            "relevance": "กายภาพ",
+            "image_generation_prompt": "Photo of a pharmacy receipt in Thai text, showing pesticide purchase, crumpled paper texture",
+            "analysis": "พิสูจน์ว่าเลขานุการซื้อสารพิษ"
+        },
+        {
+            "type": "บันทึกการโทรศัพท์",
+            "description": "บันทึกการโทรออกจากมือถือเหยื่อ เวลา 22:00 น. โทรหาภรรยา 3 นาที",
+            "location": "ข้อมูลจากผู้ให้บริการโทรศัพท์",
+            "relevance": "เทคโนโลยี",
+            "image_generation_prompt": "Screenshot of phone call log showing recent calls, mobile phone interface, digital evidence style",
+            "analysis": "แสดงว่าเหยื่อยังมีชีวิตตอน 22:00 น."
         }
-        // เพิ่มหลักฐาน 8-13 ชิ้นตามแบบ
+        // **ต้องเพิ่มหลักฐาน 4-8 ชิ้นอีก ครบ 8-12 ชิ้น ตามหมวดหมู่: กายภาพ, จิตวิทยา, หลอกลวง, เทคโนโลยี**
     ],
     "resolution": {
         // ต้องมีรายละเอียดครบถ้วนและสมเหตุสมผล รวมถึงการสร้างความประหลาดใจ
@@ -387,7 +404,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - การปกปิดหลักฐาน: หลักฐานปลอม, หลักฐานที่ซ่อน, การทำลายหลักฐาน, การใช้เทคโนโลยีในการปกปิด
 - ข้อผิดพลาดร้ายแรง: สิ่งที่ทำให้ผู้กระทำผิดถูกจับได้ แม้จะมีแผนการที่สมบูรณ์แบบ
 
-**สำคัญ: ต้องสร้างตัวละคร 4-6 คน และหลักฐาน 6-15 ชิ้น**
+**สำคัญมาก: ต้องสร้างตัวละคร 4-6 คน และหลักฐาน 8-12 ชิ้นครบถ้วน (ห้ามน้อยกว่า 8 ชิ้น) พร้อมข้อมูลครบทุกฟิลด์**
 
 เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐานและสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
 
@@ -406,6 +423,12 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - ห้ามใส่ข้อความเช่น "(ตัวละครสมมติในบริบทนี้ - ไม่ใช่บุคคลจริง)" หรือคล้ายคลึงกัน
 - ใส่เฉพาะข้อมูลที่จำเป็นสำหรับเกมเท่านั้น
 - ชื่อตัวละครและเหยื่อให้เป็นชื่อธรรมดาโดยไม่มีข้อความเพิ่มเติมใดๆ
+
+**เช็คครั้งสุดท้าย ก่อนส่งคำตอบ:**
+- ตัวละคร: มี 4-6 คน ✓
+- หลักฐาน: มี 8-12 ชิ้น ครบทุกฟิลด์ (type, description, location, relevance, image_generation_prompt, analysis) ✓
+- กลอุบาย: มี 3-4 กลวิธี ✓
+- Resolution: ครบทุกส่วนที่กำหนด ✓
 
 *GIVEN ME A VALID JSON FORMAT*"""
     
