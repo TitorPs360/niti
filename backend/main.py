@@ -258,7 +258,7 @@ async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
         print(f"Game generation failed: {e}")
 
 async def generate_script(extra_prompt: Optional[str]) -> Dict:
-    """Generate murder mystery script using Ollama"""
+    """Generate murder mystery script using Ollama with validation retry"""
     
     default_prompt = """สร้างบทหนังสืบสวนคดีฆาตรกรรมที่มีความซับซ้อนและน่าติดตาม โดยมีตัวละครหลายตัวที่มีความลับและแรงจูงใจที่แตกต่างกัน เพื่อนำไปใช้เป็นบทของเกมสืบสวน
 
@@ -286,7 +286,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
    - อาชญากรรมในอดีต/ความยุติธรรมที่บิดเบือน
    - การเงิน/ธุรกิจ (หนี้สิน/ล้มละลาย/แบล็กเมล์)
    
-4. **หลักฐาน ต้องสร้าง 8-12 ชิ้นเต็ม (ห้ามน้อยกว่า 8 ชิ้น)**:
+4. **หลักฐาน ต้องสร้าง 6-12 ชิ้นเต็ม (ห้ามน้อยกว่า 6 ชิ้น)**:
    - **กายภาพ (3-4 ชิ้น)**: DNA/ลายนิ้วมือ/เครื่องมือฆาตกรรม/ร่องรอยการต่อสู้
    - **จิตวิทยา (2-3 ชิ้น)**: จดหมาย/ไดอารี่/ข้อความ/รูปภาพส่วนตัว
    - **หลอกลวง (2-3 ชิ้น)**: หลักฐานปลอม/ข้อมูลเท็จ/พยานเท็จ
@@ -310,43 +310,44 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
     },
     "people": [ 
         // สร้างตัวละคร 4-6 คน (ต้องมีอย่างน้อย 4 คน ไม่ใช่แค่ 2-3 คน) โดยแต่ละคนต้องมีความซับซ้อน
+        // **สำคัญมาก: ใช้ชื่อฟิลด์ตามนี้เท่านั้น - ห้ามเปลี่ยนแปลง**
         {
-            "name": "คุณปัทมา ธนาคาร",
-            "age": "38", 
-            "role": "ภรรยาของเหยื่อ",
-            "relationship": "คู่สมรสที่มีปัญหา",
-            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed", // This is a description for image generation need to be in English
-            "secret": "เธอมีชู้กับคนขับรถและวางแผนจะหย่าร้าง แต่กลัวว่าจะไม่ได้มรดก",
-            "motive": "ต้องการเงินมรดกและเสรีภาพจากชีวิตแต่งงาน", // แรงจูงใจที่ซับซ้อนทางจิตวิทยา
-            "alibi": "อยู่ในห้องน้ำผู้หญิงตอนเกิดเหตุ มีสตาฟโรงแรมเห็น", // ข้ออ้างที่อาจเป็นจริงหรือปลอม
-            "details": "เป็นคนที่ดูสง่างามภายนอก แต่ข้างในมีความโลภและไร้ยางอาย มักจะแสร้งทำเป็นเศร้าโศกเมื่อพูดถึงสามี"
+            "name": "คุณปัทมา ธนาคาร",                                        // ชื่อ-สกุล (ใช้ "name" เท่านั้น)
+            "age": "38",                                                      // อายุ (ใช้ "age" เท่านั้น)
+            "role": "ภรรยาของเหยื่อ",                                         // บทบาท/ตำแหน่ง (ใช้ "role" เท่านั้น ห้ามใช้ "occupation" หรือ "job")
+            "relationship": "คู่สมรสที่มีปัญหา",                              // ความสัมพันธ์กับเหยื่อ (ใช้ "relationship" เท่านั้น)
+            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed", // คำอธิบายสำหรับสร้างภาพ ต้องเป็นภาษาอังกฤษ (ใช้ "characteristics" เท่านั้น ห้ามใช้ "description")
+            "secret": "เธอมีชู้กับคนขับรถและวางแผนจะหย่าร้าง แต่กลัวว่าจะไม่ได้มรดก",        // ความลับ (ใช้ "secret" เท่านั้น)
+            "motive": "ต้องการเงินมรดกและเสรีภาพจากชีวิตแต่งงาน",                        // แรงจูงใจ (ใช้ "motive" เท่านั้น)
+            "alibi": "อยู่ในห้องน้ำผู้หญิงตอนเกิดเหตุ มีสตาฟโรงแรมเห็น",                  // หลีกฐานที่อยู่อาจจะโกหกได้ (ใช้ "alibi" เท่านั้น)
+            "details": "เป็นคนที่ดูสง่างามภายนอก แต่ข้างในมีความโลภและไร้ยางอาย มักจะแสร้งทำเป็นเศร้าโศกเมื่อพูดถึงสามี"  // รายละเอียดเพิ่มเติม (ใช้ "details" เท่านั้น ห้ามใช้ "personality")
         },
         {
-            "name": "คุณรัชนก บุญมี",
-            "age": "29",
-            "role": "เลขานุการส่วนตัว",
-            "relationship": "ผู้ใต้บังคับบัญชาที่ถูกคุกคาม",
-            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style", // This is a description for image generation need to be in English
-            "secret": "เธอถูกเหยื่อล่วงละเมิดทางเพศและบังคับให้ทำธุรกิจผิดกฎหมาย",
-            "motive": "ต้องการแก้แค้นและหลุดพ้นจากการถูกควบคุม",
-            "alibi": "อยู่ที่โต๊ะแถวหน้า พูดคุยกับแขกเข้าร่วมงาน",
-            "details": "ดูเป็นคนเงียบขรึม แต่ข้างในเต็มไปด้วยความโกรธแค้น มักจะหลีกเลี่ยงการสบตากับเหยื่อ"
+            "name": "คุณรัชนก บุญมี",                                      // ชื่อ-สกุล (ใช้ "name" เท่านั้น)
+            "age": "29",                                                // อายุ (ใช้ "age" เท่านั้น)
+            "role": "เลขานุการส่วนตัว",                                  // บทบาท/ตำแหน่ง (ใช้ "role" เท่านั้น)
+            "relationship": "ผู้ใต้บังคับบัญชาที่ถูกคุกคาม",                // ความสัมพันธ์กับเหยื่อ (ใช้ "relationship" เท่านั้น)
+            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style", // คำอธิบายสำหรับสร้างภาพ ต้องเป็นภาษาอังกฤษ (ใช้ "characteristics" เท่านั้น)
+            "secret": "เธอถูกเหยื่อล่วงละเมิดทางเพศและบังคับให้ทำธุรกิจผิดกฎหมาย",  // ความลับ (ใช้ "secret" เท่านั้น)
+            "motive": "ต้องการแก้แค้นและหลุดพ้นจากการถูกควบคุม",                  // แรงจูงใจ (ใช้ "motive" เท่านั้น)
+            "alibi": "อยู่ที่โต๊ะแถวหน้า พูดคุยกับแขกเข้าร่วมงาน",                    // หลีกฐานที่อยู่อาจจะโกหกได้ (ใช้ "alibi" เท่านั้น)
+            "details": "ดูเป็นคนเงียบขรึม แต่ข้างในเต็มไปด้วยความโกรธแค้น มักจะหลีกเลี่ยงการสบตากับเหยื่อ"  // รายละเอียดเพิ่มเติม (ใช้ "details" เท่านั้น)
         },
         {
-            "name": "คุณวิชัย โชติกุล",
-            "age": "45",
-            "role": "หุ้นส่วนธุรกิจ",
-            "relationship": "เพื่อนร่วมงานและคู่แข่งทางธุรกิจ",
-            "characteristics": "A middle-aged Thai businessman in an expensive suit, confident posture, holding a glass of whiskey, luxury office background, professional lighting", // This is a description for image generation need to be in English
-            "secret": "ขโมยเงินจากบริษัทร่วมและเหยื่อกำลังจะเปิดโปง",
-            "motive": "กลัวถูกเปิดเผยการทุจริตและต้องการปกป้องการงาน",
-            "alibi": "โทรคุยธุรกิจกับลูกค้าต่างประเทศตลอดคืน",
-            "details": "ดูเป็นคนมั่นใจและน่าเชื่อถือ แต่จริงๆ แล้วเป็นคนโลภและไม่ซื่อสัตย์"
+            "name": "คุณวิชัย โชติกุล",                                    // ชื่อ-สกุล (ใช้ "name" เท่านั้น)
+            "age": "45",                                                // อายุ (ใช้ "age" เท่านั้น)
+            "role": "หุ้นส่วนธุรกิจ",                                    // บทบาท/ตำแหน่ง (ใช้ "role" เท่านั้น)
+            "relationship": "เพื่อนร่วมงานและคู่แข่งทางธุรกิจ",              // ความสัมพันธ์กับเหยื่อ (ใช้ "relationship" เท่านั้น)
+            "characteristics": "A middle-aged Thai businessman in an expensive suit, confident posture, holding a glass of whiskey, luxury office background, professional lighting", // คำอธิบายสำหรับสร้างภาพ ต้องเป็นภาษาอังกฤษ (ใช้ "characteristics" เท่านั้น)
+            "secret": "ขโมยเงินจากบริษัทร่วมและเหยื่อกำลังจะเปิดโปง",            // ความลับ (ใช้ "secret" เท่านั้น)
+            "motive": "กลัวถูกเปิดเผยการทุจริตและต้องการปกป้องการงาน",            // แรงจูงใจ (ใช้ "motive" เท่านั้น)
+            "alibi": "โทรคุยธุรกิจกับลูกค้าต่างประเทศตลอดคืน",                    // หลีกฐานที่อยู่อาจจะโกหกได้ (ใช้ "alibi" เท่านั้น)
+            "details": "ดูเป็นคนมั่นใจและน่าเชื่อถือ แต่จริงๆ แล้วเป็นคนโลภและไม่ซื่อสัตย์"  // รายละเอียดเพิ่มเติม (ใช้ "details" เท่านั้น)
         }
         // เพิ่มตัวละคร 2-4 คนตามแบบ
     ],
     "evidence": [
-        // **สำคัญ: ต้องสร้างหลักฐาน 8-12 ชิ้นครบถ้วน ตามหมวดหมู่ที่กำหนด**
+        // **สำคัญ: ต้องสร้างหลักฐาน 6-12 ชิ้นครบถ้วน ตามหมวดหมู่ที่กำหนด**
         {
             "type": "แก้วไวน์ที่มีร่องรอยยาพิษ",
             "description": "แก้วไวน์แดงที่พบในห้องของเหยื่อ มีร่องรอยยาพิษไซยาไนด์",
@@ -411,12 +412,12 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "image_generation_prompt": "Screenshot of mobile phone text message with timestamp, timestamp show 22:30, showing text message",
             "analysis": "ข้อความปลอมเพื่อสร้างข้ออ้างเท็จ"
         }
-        // **ต้องมีหลักฐาน 8-12 ชิ้น ตามที่กำหนด**
+        // **ต้องมีหลักฐาน 6-12 ชิ้น ตามที่กำหนด**
     ],
     "resolution": {
         // ต้องมีรายละเอียดครบถ้วนและสมเหตุสมผล รวมถึงการสร้างความประหลาดใจ
         "culprit": "คุณรัชนก บุญมี",
-        "description": "แรงจูงใจ: ถูกล่วงละเมิดและบังคับทำธุรกิจผิดกฎหมาย 2 ปี\n\nกลอุบาย: ปลอมลายมือหญิงเขียนจดหมายข่มขู่โยนความผิดให้ภรรยา, ใช้ความรู้เคมีวางยาพิษในไวน์, สร้างข้ออ้างปลอม\n\nการฆ่า: 22:15 น. ใส่ไซยาไนด์ในไวน์ขณะเหยื่ออาบน้ำ วางไว้ตามปกติ เหยื่อตาย 15 นาทีหลังดื่ม\n\nข้อผิดพลาด: ลืมทำลายใบเสร็จซื้อยาจริง ยังเก็บในกระเป๋า"
+        "description": "แรงจูงใจ: ถูกล่วงละเมิดและบังคับทำธุรกิจผิดกฎหมาย 2 ปี\n\nกลอุบาย: ปลอมลายมือหญิงเขียนจดหมายข่มขู่โยนความผิดให้ภรรยา, ใช้ความรู้เคมีวางยาพิษในไวน์, สร้างข้ออ้างปลอม\n\nขั้นตอนฆาตกรรม: 22:15 น. ใส่ไซยาไนด์ในไวน์ขณะเหยื่ออาบน้ำ วางไว้ตามปกติ เหยื่อตาย 15 นาทีหลังดื่ม\n\nการปกปิดหลักฐาน:ใช้โทรศัพท์ของเหยื่อส่งข้อความจากมือถือเหยื่อ\n\nข้อผิดพลาด: ลืมทำลายใบเสร็จซื้อยาจริง ยังเก็บในกระเป๋า"
     }
 }
 
@@ -436,7 +437,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - การปกปิดหลักฐาน: หลักฐานปลอม, หลักฐานที่ซ่อน, การทำลายหลักฐาน, การใช้เทคโนโลยีในการปกปิด
 - ข้อผิดพลาดร้ายแรง: สิ่งที่ทำให้ผู้กระทำผิดถูกจับได้ แม้จะมีแผนการที่สมบูรณ์แบบ
 
-**สำคัญมาก: ต้องสร้างตัวละคร 4-6 คน และหลักฐาน 8-12 ชิ้นครบถ้วน (ห้ามน้อยกว่า 8 ชิ้น) พร้อมข้อมูลครบทุกฟิลด์**
+**สำคัญมาก: ต้องสร้างตัวละคร 4-6 คน และหลักฐาน 6-12 ชิ้นครบถ้วน (ห้ามน้อยกว่า 6 ชิ้น) พร้อมข้อมูลครบทุกฟิลด์**
 
 เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐานและสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
 
@@ -457,10 +458,17 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - ชื่อตัวละครและเหยื่อให้เป็นชื่อธรรมดาโดยไม่มีข้อความเพิ่มเติมใดๆ
 
 **ข้อกำหนดบังคับ - ไม่ปฏิบัติตามถือว่าไม่ผ่าน:**
-1. หลักฐาน (evidence) ต้องมี **อย่างน้อย 8 ชิ้น** ในรูปแบบ Array
+1. หลักฐาน (evidence) ต้องมี **อย่างน้อย 6 ชิ้น** ในรูปแบบ Array
 2. แต่ละหลักฐานต้องมีฟิลด์ครบ: type, description, location, relevance, image_generation_prompt, analysis  
 3. ตัวละคร (people) ต้องมี **4-6 คน**
 4. กลอุบาย ต้องมี **3-4 กลวิธี** ใน resolution
+
+**ข้อกำหนดชื่อฟิลด์ตัวละคร - ห้ามใช้ชื่อฟิลด์อื่น:**
+- ใช้ "role" ไม่ใช่ "occupation", "job", "work", "position"
+- ใช้ "characteristics" ไม่ใช่ "description", "appearance", "looks"  
+- ใช้ "details" ไม่ใช่ "personality", "character", "traits"
+- ใช้ "relationship" ไม่ใช่ "relation", "connection"
+- ต้องมีฟิลด์ครบถ้วน: name, age, role, relationship, characteristics, secret, motive, alibi, details
 
 *RETURN ONLY VALID JSON - NO EXPLANATIONS OR COMMENTS OUTSIDE JSON*"""
     
@@ -470,43 +478,84 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
     else:
         prompt = default_prompt
     
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            "http://ollama-service:11434/api/generate",
-            json={
-                "model": "gemma3:27b",
-                "prompt": prompt,
-                "stream": False,
-                "format": "json"
-            }
-        ) as response:
-            if response.status != 200:
-                raise Exception("Failed to generate script")
-            
-            result = await response.json()
-            script_text = result["response"]
-            
-            # Parse JSON response
-            try:
-                script = json.loads(script_text)
-                
-                # Evidence count
-                evidence_count = len(script.get("evidence", []))
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "http://ollama-service:11434/api/generate",
+                    json={
+                        "model": "gemma3:27b",
+                        "prompt": prompt,
+                        "stream": False,
+                        "format": "json"
+                    }
+                ) as response:
+                    if response.status != 200:
+                        raise Exception("Failed to generate script")
+                    
+                    result = await response.json()
+                    script_text = result["response"]
+                    
+                    # Parse JSON response
+                    try:
+                        script = json.loads(script_text)
+                    except json.JSONDecodeError:
+                        # If JSON parsing fails, try to extract JSON from the response
+                        import re
+                        json_match = re.search(r'\{.*\}', script_text, re.DOTALL)
+                        if json_match:
+                            script = json.loads(json_match.group())
+                        else:
+                            raise Exception("Failed to parse generated script as JSON")
+                    
+                    # Evidence count
+                    evidence_count = len(script.get("evidence", []))
 
-                # Character count
-                character_count = len(script.get("people", []))
+                    # Character count
+                    character_count = len(script.get("people", []))
 
-                print(f"Script has: {character_count} characters, {evidence_count} evidence pieces")
-                return script
-            except json.JSONDecodeError:
-                # If JSON parsing fails, try to extract JSON from the response
-                import re
-                json_match = re.search(r'\{.*\}', script_text, re.DOTALL)
-                if json_match:
-                    script = json.loads(json_match.group())
+                    if character_count < 4 or character_count > 6:
+                        raise Exception(f"Invalid character count: {character_count}. Must be between 4 and 6 characters.")
+                    if evidence_count < 6:
+                        raise Exception(f"Invalid evidence count: {evidence_count}. Must be at least 8 pieces of evidence.")
+
+                    # Validate character field structure
+                    required_character_fields = ["name", "age", "role", "relationship", "characteristics", "secret", "motive", "alibi", "details"]
+                    forbidden_character_fields = ["occupation", "description", "job", "work", "personality", "character"]
+                    
+                    for i, person in enumerate(script.get("people", [])):
+                        # Check for missing required fields
+                        missing_fields = [field for field in required_character_fields if field not in person]
+                        if missing_fields:
+                            raise Exception(f"Character {i+1} missing required fields: {missing_fields}")
+                        
+                        # Check for forbidden field names (commonly confused ones)
+                        person_fields = set(person.keys())
+                        forbidden_found = person_fields.intersection(forbidden_character_fields)
+                        if forbidden_found:
+                            raise Exception(f"Character {i+1} uses forbidden field names: {list(forbidden_found)}. Use correct field names: role (not occupation), characteristics (not description)")
+
+                    # Validate evidence field structure  
+                    required_evidence_fields = ["type", "description", "location", "relevance", "image_generation_prompt", "analysis"]
+                    for i, evidence in enumerate(script.get("evidence", [])):
+                        missing_fields = [field for field in required_evidence_fields if field not in evidence]
+                        if missing_fields:
+                            raise Exception(f"Evidence {i+1} missing required fields: {missing_fields}")
+
+                    print(f"Script validation passed on attempt {attempt + 1}: {character_count} characters, {evidence_count} evidence pieces")
                     return script
-                else:
-                    raise Exception("Failed to parse generated script as JSON")
+                    
+        except Exception as e:
+            print(f"Script generation attempt {attempt + 1} failed: {e}")
+            if attempt == max_retries - 1:
+                # Last attempt failed, raise the exception
+                raise e
+            else:
+                # Add stronger field name warnings to prompt for retry
+                prompt += f"\n\n**CRITICAL ERROR DETECTED - RETRY WITH CORRECT FIELD NAMES:**\nPrevious attempt failed: {str(e)}\nUSE EXACT FIELD NAMES: name, age, role, relationship, characteristics, secret, motive, alibi, details\nDO NOT USE: occupation, description, job, work, personality, character"
+                print(f"Retrying script generation with enhanced prompt (attempt {attempt + 2}/{max_retries})")
+                continue
                 
 async def generate_character_images(people: List[Dict], game_id: str):
     """Generate character images using Flux"""
