@@ -39,8 +39,13 @@ game_state = {
 chat_histories = {}
 
 # Directories
-GAME_DATA_DIR = "/app/game_data"
-ASSETS_DIR = "/app/assets"
+# Use local directories if /app doesn't exist (development mode)
+if os.path.exists("/app"):
+    GAME_DATA_DIR = "/app/game_data"
+    ASSETS_DIR = "/app/assets"
+else:
+    GAME_DATA_DIR = "./game_data"
+    ASSETS_DIR = "./assets"
 
 class GameScript(BaseModel):
     """Complete murder mystery game script"""
@@ -514,7 +519,7 @@ async def restart_game():
         if os.path.exists(GAME_DATA_DIR):
             shutil.rmtree(GAME_DATA_DIR)
         
-        # Clear assets directory
+        # Clear assets directory  
         if os.path.exists(ASSETS_DIR):
             shutil.rmtree(ASSETS_DIR)
         
