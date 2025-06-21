@@ -247,51 +247,95 @@ async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
 async def generate_script(extra_prompt: Optional[str]) -> Dict:
     """Generate murder mystery script using Ollama"""
     
-    default_prompt = """สร้างบทหนังสืบสวนคดีฆาตรกรรมที่มีความซับซ้อนและน่าติดตาม โดยมีตัวละครหลายตัวที่มีความลับและแรงจูงใจที่แตกต่างกัน เพื่อนำไปใช้เป็นบทของเกมสิบสวน
+    default_prompt = """สร้างบทหนังสืบสวนคดีฆาตรกรรมที่มีความซับซ้อนและน่าติดตาม โดยมีตัวละครหลายตัวที่มีความลับและแรงจูงใจที่แตกต่างกัน เพื่อนำไปใช้เป็นบทของเกมสืบสวน
+
+ข้อกำหนดในการสร้างเนื้อหา:
+1. ตัวละคร: สร้าง 4-6 ตัวละคร แต่ละคนต้องมีความลับที่ซับซ้อน แรงจูงใจที่หลากหลาย และข้อแก้ตัวที่อาจขัดแย้งกัน
+2. หลักฐาน: สร้าง 6-10 ชิ้นหลักฐาน แบ่งเป็น:
+   - หลักฐานสำคัญ (3-4 ชิ้น): เชื่อมโยงโดยตรงกับผู้กระทำผิดและการฆาตกรรม
+   - หลักฐานหลอกลวง (2-3 ชิ้น): ชี้ไปยังผู้ต้องสงสัยคนอื่นแต่เป็นเท็จ
+   - หลักฐานเสริม (1-3 ชิ้น): ให้ข้อมูลเพิ่มเติมเกี่ยวกับบุคลิกตัวละครและบริบท
+3. ความสัมพันธ์: ตัวละครต้องมีความสัมพันธ์ที่ซับซ้อนและขัดแย้งกัน
+
 โดยอ้างอิงจากโครงสร้างที่กำหนดไว้ดังนี้:
 
 {
     "situation": {
-        // ส่วนนี้จะเป็นการแนะนำสถานการณ์ก่อนเกิดเหตุและสถานที่เกิดเหตุการณ์ตามตัวอย่างด้านล่าง, สามารถแก้ไขชื่อ อายุ และอื่นๆ ได้ตามความเหมาะสม
-        "location": "ห้องทดลองวิจัยทางวิทยาศาสตร์",
-        "time": "คืนวันศุกร์ที่ผ่านมา",
-        "victim": "ดร. วิชัย",
-        "age": "50",
-        "cause_of_death": "ถูกแทงที่หน้าอก",
-        "details": "The security guard pointed at the avenue direction and kept uttering 'white clothes'."
+        // ส่วนนี้จะเป็นการแนะนำสถานการณ์ก่อนเกิดเหตุและสถานที่เกิดเหตุการณ์ตามตัวอย่างด้านล่าง
+        "location": "โรงแรมหรูแห่งหนึ่งในกรุงเทพ",
+        "time": "คืนวันเสาร์ เวลา 22:30 น.",
+        "victim": "คุณสมชาย ธนาคาร",
+        "age": "45",
+        "cause_of_death": "ถูกวางยาพิษในเครื่องดื่ม",
+        "details": "เหยื่อเป็นนักธุรกิจที่มีปฏิปักษ์มากมาย พบเสียชีวิตในห้องสูทของโรงแรม"
     },
-    "people": [ // สร้างตัวละครโดยใช้โครงสร้างที่กำหนดไว้ดังนี้:
-        // ระบุลักษณะและแรงจูงใจของตัวละคนให้ชัดเจน รวมถึงหลักฐานที่อยู่ของพวกเขาด้วย ตามตัวอย่างด้านล่าง, ชื่อ อายุ และส่วนอื่นๆ สามารถเปลี่ยนแปลงได้ตามความเหมาะสม
+    "people": [ 
+        // สร้างตัวละคร 4-6 คน โดยแต่ละคนต้องมีความซับซ้อน
         {
-            "name": "ดร. ณิชา วงศ์พิทักษ์",
-            "age": "25",
-            "role": "นักวิทยาศาสตร์ที่มีชื่อเสียง",
-            "relationship": "เพื่อนร่วมงานของเหยื่อ",
-            "characteristics": "A tall, elegant model with beautiful hands and a lovely face, artistically detailed makeup, wearing a long gown with a deep slit and backless dress designs, a delicate necklace with a small diamond pendant, an elegant updo hairstyle to complement the backless gown, a sparkling bracelet to enhance her elegance, and a diamond anklet or a barefoot sandal on her foot, with blonde highlights and shadow in her hair), luxury dinner room environment in the background. night time photo. (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)", // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt
-            "secret": "เขามีส่วนเกี่ยวข้องกับการทดลองผิดกฎหมายที่อาจเป็นสาเหตุของการฆาตกรรม",
-            "motive": "ต้องการปกป้องชื่อเสียงและงานวิจัยของตนเอง",
-            "alibi": "อยู่ในห้องทดลองตลอดคืน", // นั้นสามารถเป็นจริง หรือ เท็จก็ได้ และอาจจะขัดแย้งหรือลงตัวกับของคนอื่นก็ได้เช่นกัน รวมถึงสามารถอ้างถึงพยานยินยันที่อยู่ได้
-            "details": "เธอเป็นคนที่มีความทะเยอทะยานสูงและไม่สนใจวิธีการที่ใช้ในการบรรลุเป้าหมาย" //  จะถูกนำไปอ้างอิงเพื่อสร้างตัวละคร จะนำไปใช้กับ llm อีกตัวเพื่อแสดงเป็นการสอบสวนตัวละครตัวนั้นๆ จึงต้องระบุอย่างชัดเจน
+            "name": "คุณปัทมา ธนาคาร",
+            "age": "38", 
+            "role": "ภรรยาของเหยื่อ",
+            "relationship": "คู่สมรสที่มีปัญหา",
+            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed, (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)", // ต้องเป็นภาษาอังกฤษเพื่อใช้ในการสร้างรูปภาพ
+            "secret": "เธอมีชู้กับคนขับรถและวางแผนจะหย่าร้าง แต่กลัวว่าจะไม่ได้มรดก",
+            "motive": "ต้องการเงินมรดกและเสรีภาพจากชีวิตแต่งงาน",
+            "alibi": "อยู่ในห้องน้ำผู้หญิงตอนเกิดเหตุ มีสตาฟโรงแรมเห็น",
+            "details": "เป็นคนที่ดูสง่างามภายนอก แต่ข้างในมีความโลภและไร้ยางอาย มักจะแสร้งทำเป็นเศร้าโศกเมื่อพูดถึงสามี"
+        },
+        {
+            "name": "คุณรัชนก บุญมี",
+            "age": "29",
+            "role": "เลขานุการส่วนตัว",
+            "relationship": "ผู้ใต้บังคับบัญชาที่ถูกคุกคาม",
+            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style, (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)",
+            "secret": "เธอถูกเหยื่อล่วงละเมิดทางเพศและบังคับให้ทำธุรกิจผิดกฎหมาย",
+            "motive": "ต้องการแก้แค้นและหลุดพ้นจากการถูกควบคุม",
+            "alibi": "อยู่ที่โต๊ะแถวหน้า พูดคุยกับแขกเข้าร่วมงาน",
+            "details": "ดูเป็นคนเงียบขรึม แต่ข้างในเต็มไปด้วยความโกรธแค้น มักจะหลีกเลี่ยงการสบตากับเหยื่อ"
         }
     ],
     "evidence": [
-        // สร้างหลักฐานที่เกี่ยวข้องกับคดีนี้ โดยใช้โครงสร้างที่กำหนดตามตัวอย่างด้านล่าง, ประเภท คำอธิบาย และส่วนอื่นๆ สามารถเปลี่ยนแปลงได้ตามความเหมาะสม
+        // สร้างหลักฐาน 6-120ชิ้น โดยแบ่งประเภทตามความสำคัญ
         {
-            "type": "วัตถุพยาน",
-            "description": "นาฬิกาดิจิตอลที่แสดงเวลา 04:20 ถูกพบที่เกิดเหตุ",
-            "location": "บริเวณลานจอดรถ",
-            "image_generation_prompt": "Close-up photo of a digital clock covered in frost. Display reads "04:20".}" // This filed should be in ENGLISH, and follow style like given example, used for image generation prompt (make sure it include the details and align with the description)
+            "type": "แก้วไวน์ที่มีร่องรอยยาพิษ",
+            "description": "แก้วไวน์แดงที่พบในห้องของเหยื่อ มีร่องรอยยาพิษไซยาไนด์ ยังคงมีไวน์เหลืออยู่ครึ่งแก้ว",
+            "location": "โต๊ะข้างเตียงในห้องสูท",
+            "relevance": "สำคัญ",
+            "image_generation_prompt": "Close-up photo of an elegant wine glass with red wine, sitting on a marble table, dramatic lighting, crime scene photography style, high detail",
+            "analysis": "หลักฐานหลักที่พิสูจน์วิธีการฆ่า - ยาพิษถูกผสมในไวน์"
+        },
+        {
+            "type": "จดหมายข่มขู่",
+            "description": "จดหมายข่มขู่ที่ส่งมาให้เหยื่อเมื่อ 3 วันก่อน เขียนด้วยลายมือที่ดูเหมือนผู้หญิง",
+            "location": "ในกระเป๋าเอกสารของเหยื่อ",
+            "relevance": "หลอกลวง",
+            "image_generation_prompt": "Photo of a threatening letter written in Thai, feminine handwriting, on cream paper, photographed under police investigation lighting",
+            "analysis": "ตัวอักษรลายมือหญิงทำให้สงสัยภรรยา แต่จริงๆ แล้วเป็นการปลอมแปลง"
+        },
+        {
+            "type": "ใบเสร็จร้านขายยา",
+            "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อ 2 วันก่อนเกิดเหตุ",
+            "location": "ในกระเป๋าถือของเลขานุการ",
+            "relevance": "สำคัญ",
+            "image_generation_prompt": "Photo of a pharmacy receipt in Thai text, showing pesticide purchase, crumpled paper texture, evidence photography style",
+            "analysis": "พิสูจน์ว่าเลขานุการซื้อสารพิษ เป็นหลักฐานสำคัญที่ชี้ตัวผู้กระทำผิด"
         }
     ],
     "resolution": {
-        // ส่วนนี้จะเป็นการสรุปผลการสืบสวนและการเปิดเผยความจริง ให้เนื้อหามีความซับซ้อนและน่าติดตาม และสร้างความตประหลาดใจให้กับผู้เล่น แต่ยังคงมีความสมเหตุสมผล
-        "culprit": "ดร. อภิชาติ",
-        "description": "เหยื่อถูกวางบนกล่องลิฟต์ ทำให้มีน้ำหนักที่ไม่สามารถมองเห็นได้"
+        // ต้องสมเหตุสมผลและสร้างความประหลาดใจ
+        "culprit": "คุณรัชนก บุญมี",
+        "description": "เลขานุการวางแผนฆาตกรรมอย่างละเอียด เธอใส่ยาพิษในไวน์ที่เตรียมไว้ให้เจ้านายดื่มหลังกลับห้อง และปลอมใบเสร็จให้ดูเหมือนว่าภรรยาเป็นคนซื้อ แต่ลืมทำลายใบเสร็จจริงที่อยู่ในกระเป๋าตัวเอง"
     }
 }
 
-เหตุการณ์และตัวละครทั้งหมดด้านบนเป็นเพียงตัวอย่าง คุณสามารถสร้างตัวละครและเหตุการณ์เพิ่มเติมได้ตามต้องการ
-เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐาน และสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
+หลักการสำคัญ:
+- หลักฐานต้องเชื่อมโยงกันและนำไปสู่ความจริง
+- ต้องมีหลักฐานหลอกลวงที่ทำให้ผู้เล่นเข้าใจผิด
+- ตัวละครแต่ละคนต้องมีแรงจูงใจที่เข้าใจได้
+- การแก้ปริศนาต้องอาศัยการวิเคราะห์หลักฐานและการสอบสวนตัวละคร
+
+เหตุการณ์และตัวละครด้านบนเป็นเพียงตัวอย่าง คุณสามารถสร้างเรื่องราวใหม่ทั้งหมดได้
+เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐานและสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
 
 *GIVEN ME A VALID JSON FORMAT*"""
     
