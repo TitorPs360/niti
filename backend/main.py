@@ -287,6 +287,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
    - การเงิน/ธุรกิจ (หนี้สิน/ล้มละลาย/แบล็กเมล์)
    
 4. **หลักฐาน 6-15 ชิ้น**:
+   - ข้อมูลของหลักฐานต้องครบถ้วนตามโครงสร้างที่กำหนดไว้
    - กายภาพ (4-5): DNA/ลายนิ้วมือปลอม/เครื่องมือฆาตกรรมที่ซับซ้อน
    - จิตวิทยา (2-3): จดหมาย/ไดอารี่/ข้อความที่เผยจิตใจ
    - หลอกลวง (3-4): ข้ออ้างปลอม/พยานเท็จ/ข้อมูลปลอม
@@ -344,7 +345,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         // เพิ่มตัวละคร 2-4 คนตามแบบ
     ],
     "evidence": [
-        // สร้างหลักฐาน 10-15 ชิ้น
+        // สร้างหลักฐาน 10-15 ชิ้น และข้อมูลครบถ้วนเกี่ยวกับหลักฐานแต่ละชิ้น
         {
             "type": "แก้วไวน์ที่มีร่องรอยยาพิษ",
             "description": "แก้วไวน์แดงที่พบในห้องของเหยื่อ มีร่องรอยยาพิษไซยาไนด์",
@@ -358,7 +359,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "description": "จดหมายข่มขู่ลายมือหญิงส่งมา 3 วันก่อน",
             "location": "ในกระเป๋าเอกสารของเหยื่อ",
             "relevance": "หลอกลวง",
-            "image_generation_prompt": "Photo of a threatening letter written in Thai, feminine handwriting, on cream paper", // This is a description for image generation need to be in English
+            "image_generation_prompt": "Photo of a threatening letter written, feminine handwriting, on cream paper", // This is a description for image generation need to be in English
             "analysis": "ตัวอักษรลายมือหญิงทำให้สงสัยภรรยา แต่จริงๆ แล้วเป็นการปลอมแปลงเพื่อใส่ร้ายภรรยา"
         }
         // เพิ่มหลักฐาน 8-13 ชิ้นตามแบบ
