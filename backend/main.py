@@ -422,7 +422,7 @@ async def generate_character_images(people: List[Dict], game_id: str):
             filename = f"{game_id}_character_{i}_{person['name']}"
             print(f"Generating character image: {filename}")
             image_id = await request_image_generation(
-                f"{person["characteristics"]}, (Portrait Photo), (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With A [Pentax 645z | Canon Eos R5]:0.6)",
+                f"{person["characteristics"]}, (Portrait Photo), (High Quality, Detailed Background, Sharp Image:1.24), (Hyper-Detailed:1.15), (Photography, Cinematic Photo, Film-Grain:1.2), (Sharp Photo:1.2) (Taken With Canon Eos R5:0.6)",
                 filename
             )
             person["image_id"] = image_id
