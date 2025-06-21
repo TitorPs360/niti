@@ -376,10 +376,42 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "description": "บันทึกการโทรออกจากมือถือเหยื่อ เวลา 22:00 น. โทรหาภรรยา 3 นาที",
             "location": "ข้อมูลจากผู้ให้บริการโทรศัพท์",
             "relevance": "เทคโนโลยี",
-            "image_generation_prompt": "Screenshot of phone call log showing recent calls, mobile phone interface, digital evidence style",
+            "image_generation_prompt": "Screenshot of phone call log showing recent calls, mobile phone interface, showing timestamp 22:00, digital evidence style",
             "analysis": "แสดงว่าเหยื่อยังมีชีวิตตอน 22:00 น."
+        },
+        {
+            "type": "ไดอารี่ส่วนตัว",
+            "description": "ไดอารี่ของเหยื่อเขียนเมื่อ 1 สัปดาห์ก่อน บันทึกความกลัวและความสงสัย",
+            "location": "ลิ้นชักโต๊ะทำงานในบ้าน",
+            "relevance": "จิตวิทยา",
+            "image_generation_prompt": "Photo of an open diary with handwritten Thai text, personal thoughts, on a wooden desk",
+            "analysis": "เผยความรู้สึกของเหยื่อก่อนเสียชีวิต"
+        },
+        {
+            "type": "ลายนิ้วมือบนขวดไวน์",
+            "description": "ลายนิ้วมือที่พบบนขวดไวน์ไม่ตรงกับเหยื่อหรือใครในครอบครัว",
+            "location": "ขวดไวน์ในห้องครัว",
+            "relevance": "กายภาพ",
+            "image_generation_prompt": "Close-up forensic photo of fingerprints on wine bottle, crime scene evidence photography",
+            "analysis": "ลายนิ้วมือของผู้กระทำผิดที่เหลือไว้"
+        },
+        {
+            "type": "กล้องวงจรปิด",
+            "description": "บันทึกภาพจากกล้องลิฟต์ แสดงเลขานุการขึ้นมาชั้น 15 เวลา 21:45 น.",
+            "location": "ระบบรักษาความปลอดภัยของโรงแรม",
+            "relevance": "เทคโนโลยี",
+            "image_generation_prompt": "CCTV footage screenshot showing person in elevator, elevator show floor 15 number, timestamp visible, timestamps show 21:45, security camera style",
+            "analysis": "พิสูจน์ว่าเลขานุการอยู่ในโรงแรมก่อนเกิดเหตุ"
+        },
+        {
+            "type": "ข้อความปลอมในมือถือ",
+            "description": "ข้อความที่ส่งจากมือถือเหยื่อหา 22:30 น. แต่เหยื่อเสียชีวิตแล้ว",
+            "location": "มือถือของเหยื่อ",
+            "relevance": "หลอกลวง",
+            "image_generation_prompt": "Screenshot of mobile phone text message with timestamp, timestamp show 22:30, showing text message",
+            "analysis": "ข้อความปลอมเพื่อสร้างข้ออ้างเท็จ"
         }
-        // **ต้องเพิ่มหลักฐาน 4-8 ชิ้นอีก ครบ 8-12 ชิ้น ตามหมวดหมู่: กายภาพ, จิตวิทยา, หลอกลวง, เทคโนโลยี**
+        // **ต้องมีหลักฐาน 8-12 ชิ้น ตามที่กำหนด**
     ],
     "resolution": {
         // ต้องมีรายละเอียดครบถ้วนและสมเหตุสมผล รวมถึงการสร้างความประหลาดใจ
@@ -424,13 +456,13 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - ใส่เฉพาะข้อมูลที่จำเป็นสำหรับเกมเท่านั้น
 - ชื่อตัวละครและเหยื่อให้เป็นชื่อธรรมดาโดยไม่มีข้อความเพิ่มเติมใดๆ
 
-**เช็คครั้งสุดท้าย ก่อนส่งคำตอบ:**
-- ตัวละคร: มี 4-6 คน ✓
-- หลักฐาน: มี 8-12 ชิ้น ครบทุกฟิลด์ (type, description, location, relevance, image_generation_prompt, analysis) ✓
-- กลอุบาย: มี 3-4 กลวิธี ✓
-- Resolution: ครบทุกส่วนที่กำหนด ✓
+**ข้อกำหนดบังคับ - ไม่ปฏิบัติตามถือว่าไม่ผ่าน:**
+1. หลักฐาน (evidence) ต้องมี **อย่างน้อย 8 ชิ้น** ในรูปแบบ Array
+2. แต่ละหลักฐานต้องมีฟิลด์ครบ: type, description, location, relevance, image_generation_prompt, analysis  
+3. ตัวละคร (people) ต้องมี **4-6 คน**
+4. กลอุบาย ต้องมี **3-4 กลวิธี** ใน resolution
 
-*GIVEN ME A VALID JSON FORMAT*"""
+*RETURN ONLY VALID JSON - NO EXPLANATIONS OR COMMENTS OUTSIDE JSON*"""
     
     # Combine default prompt with extra prompt if provided
     if extra_prompt:
@@ -457,6 +489,14 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             # Parse JSON response
             try:
                 script = json.loads(script_text)
+                
+                # Evidence count
+                evidence_count = len(script.get("evidence", []))
+
+                # Character count
+                character_count = len(script.get("people", []))
+
+                print(f"Script has: {character_count} characters, {evidence_count} evidence pieces")
                 return script
             except json.JSONDecodeError:
                 # If JSON parsing fails, try to extract JSON from the response
