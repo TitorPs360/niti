@@ -219,6 +219,14 @@ async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
         # Generate script using Ollama
         script = await generate_script(extra_prompt)
         
+        # Save script FIRST for review before generating images
+        script_path = os.path.join(GAME_DATA_DIR, f"{game_id}_script_raw.json")
+        with open(script_path, 'w', encoding='utf-8') as f:
+            json.dump(script, f, ensure_ascii=False, indent=2)
+        
+        print(f"Script generated and saved for review: {script_path}")
+        print("Please review the script before continuing with image generation...")
+        
         # Generate character images
         await generate_character_images(script["people"], game_id)
         
@@ -228,12 +236,12 @@ async def generate_game_content(game_id: str, extra_prompt: Optional[str]):
         # Wait for all image generation to complete
         await wait_for_all_images_complete(script)
         
-        # Save script with image_ids
-        script_path = os.path.join(GAME_DATA_DIR, f"{game_id}_script.json")
-        with open(script_path, 'w', encoding='utf-8') as f:
+        # Save final script with image_ids
+        final_script_path = os.path.join(GAME_DATA_DIR, f"{game_id}_script.json")
+        with open(final_script_path, 'w', encoding='utf-8') as f:
             json.dump(script, f, ensure_ascii=False, indent=2)
         
-        print(f"Script saved with image IDs: {script_path}")
+        print(f"Final script saved with image IDs: {final_script_path}")
         
         # Unload Flux model to free memory
         await unload_flux_model()
