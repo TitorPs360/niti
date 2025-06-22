@@ -291,7 +291,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
    - **จิตวิทยา (2-3 ชิ้น)**: จดหมาย/ไดอารี่/ข้อความ/รูปภาพส่วนตัว
    - **หลอกลวง (2-3 ชิ้น)**: หลักฐานปลอม/ข้อมูลเท็จ/พยานเท็จ
    - **เทคโนโลยี (2-3 ชิ้น)**: บันทึกโทร/CCTV/GPS/ข้อมูลคอมพิวเตอร์
-   - แต่ละชิ้นต้องมี: type, description, location, relevance, image_generation_prompt, analysis
    - **relevance ต้องเป็นหนึ่งในสี่ประเภทนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"**
    - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น **NEED TO BE IN ENGLISH** เพื่อให้สามารถสร้างภาพได้
 
@@ -356,11 +355,11 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "analysis": "ลายมือปลอมเพื่อใส่ร้ายภรรยา"
         },
         {
-            "type": "ใบเสร็จร้านขายยา",
+            "type": "ใบเสร็จ",
             "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อ 2 วันก่อนเกิดเหตุ",
             "location": "ในกระเป๋าถือของเลขานุการ",
             "relevance": "กายภาพ",
-            "image_generation_prompt": "Photo of a pharmacy receipt in Thai text, showing pesticide purchase, crumpled paper texture",
+            "image_generation_prompt": "Photo of a receipt, showing pesticide purchase, crumpled paper texture",
             "analysis": "พิสูจน์ว่าเลขานุการซื้อสารพิษ"
         },
         {
@@ -438,8 +437,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 **ข้อกำหนดภาษา - สำคัญมาก:**
 - **ฟิลด์ที่ต้องเป็นภาษาอังกฤษเท่านั้น:** characteristics, image_generation_prompt
 - **ฟิลด์อื่นๆ ทั้งหมดต้องเป็นภาษาไทยเท่านั้น:** name, role, relationship, secret, motive, alibi, details, type, description, location, analysis, victim, cause_of_death
-- ห้ามใช้ภาษาอังกฤษในฟิลด์ที่กำหนดให้เป็นภาษาไทย
-- ห้ามใช้ภาษาไทยในฟิลด์ที่กำหนดให้เป็นภาษาอังกฤษ
 
 **ข้อกำหนดบังคับ - ไม่ปฏิบัติตามถือว่าไม่ผ่าน:**
 1. หลักฐาน (evidence) ต้องมี **อย่างน้อย 6 ชิ้น** ในรูปแบบ Array
@@ -448,13 +445,11 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 4. กลอุบาย ต้องมี **3-4 กลวิธี** ใน resolution
 
 **ข้อกำหนดชื่อฟิลด์ตัวละคร - ห้ามใช้ชื่อฟิลด์อื่น:**
-- ใช้ "role" ไม่ใช่ "occupation", "job", "work", "position"
-- ใช้ "characteristics" ไม่ใช่ "description", "appearance", "looks" และต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
-- ใช้ "details" ไม่ใช่ "personality", "character", "traits"
-- ใช้ "relationship" ไม่ใช่ "relation", "connection"
 - ต้องมีฟิลด์ครบถ้วน: name, age, role, relationship, characteristics, secret, motive, alibi, details
+- ใช้ "characteristics" ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
 
-**ข้อกำหนดฟิลด์หลักฐาน - ห้ามใช้ค่าอื่น:**
+**ข้อกำหนดฟิลด์หลักฐาน - ห้ามใช้ชื่อฟิลด์อื่น:**
+- ต้องมีฟิลด์ครบถ้วน: type, description, location, relevance, image_generation_prompt, analysis
 - type ต้องเป็นประเภทที่ชัดเจน เช่น "DNA", "จดหมายข่มขู่", "ใบเสร็จ", "บันทึกการโทรศัพท์", "ไดอารี่ส่วนตัว", "ลายนิ้ว", "กล้องวงจรปิด"
 - relevance ต้องเป็นหนึ่งในนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"
 - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
