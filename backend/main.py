@@ -636,14 +636,28 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                 # Last attempt failed, raise the exception
                 raise e
             else:
-                # Add stronger field name warnings to prompt for retry
-                # error_message = str(e)
-                # language_warning = ""
-                # if "must be in Thai" in error_message or "must be in English" in error_message:
-                #     language_warning = "\n**LANGUAGE ERROR - USE CORRECT LANGUAGE:**\n- characteristics และ image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น\n- ฟิลด์อื่นๆ ทั้งหมดต้องเป็นภาษาไทยเท่านั้น: name, role, relationship, secret, motive, alibi, details, type, description, location, analysis, victim, cause_of_death"
+                # Reset to base prompt and add concise error guidance (prevent prompt growth)
+                prompt = default_prompt
+                if extra_prompt:
+                    prompt += "\n\nเพิ่มเติม: " + extra_prompt
                 
-                prompt += f"\n\n**CRITICAL ERROR DETECTED - RETRY WITH CORRECT FIELD NAMES:**\nPrevious attempt failed: {str(e)}\nUSE EXACT FIELD NAMES: name, age, role, relationship, characteristics, secret, motive, alibi, details\nDO NOT USE: occupation, description, job, work, personality, character"
-                print(f"Retrying script generation with enhanced prompt (attempt {attempt + 2}/{max_retries})")
+                # Add concise error correction based on error type
+                error_message = str(e)[:100]  # Limit error message length
+                
+                if "forbidden field names" in error_message:
+                    prompt += "\n\n**FIELD NAME ERROR - FIX REQUIRED:**\nUSE ONLY: name, age, role, relationship, characteristics, secret, motive, alibi, details"
+                elif "must be in Thai" in error_message:
+                    prompt += "\n\n**LANGUAGE ERROR - FIX REQUIRED:**\nAll fields must be in Thai EXCEPT: characteristics, image_generation_prompt (English only)"
+                elif "must be in English" in error_message:
+                    prompt += "\n\n**LANGUAGE ERROR - FIX REQUIRED:**\ncharacteristics and image_generation_prompt must be in English only"
+                elif "Invalid evidence count" in error_message:
+                    prompt += "\n\n**EVIDENCE ERROR - FIX REQUIRED:**\nMust generate at least 6 pieces of evidence"
+                elif "Invalid character count" in error_message:
+                    prompt += "\n\n**CHARACTER ERROR - FIX REQUIRED:**\nMust generate between 4-6 characters"
+                else:
+                    prompt += f"\n\n**ERROR - FIX REQUIRED:**\n{error_message}"
+                
+                print(f"Retrying script generation with targeted fix (attempt {attempt + 2}/{max_retries})")
                 continue
                 
 async def generate_character_images(people: List[Dict], game_id: str):
