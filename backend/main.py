@@ -497,25 +497,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                     if evidence_count < 6:
                         raise Exception(f"Invalid evidence count: {evidence_count}. Must be at least 6 pieces of evidence.")
                     
-                    # Validate that evidence descriptions are detailed enough
-                    for i, evidence in enumerate(script.get("evidence", [])):
-                        description = evidence.get("description", "")
-                        if len(description) < 30:  # Minimum length check for detailed descriptions
-                            raise Exception(f"Evidence {i+1} description too short. Must include detailed content (what's written, whose DNA/fingerprint, who's in CCTV, etc.)")
-                        
-                        # Check for specific detail patterns based on evidence type
-                        evidence_type = evidence.get("type", "").lower()
-                        if any(keyword in evidence_type for keyword in ["จดหมาย", "โน้ต", "ไดอารี่", "บันทึก"]):
-                            if not any(phrase in description for phrase in ["เขียนว่า", "ข้อความ", "เนื้อหา", "บันทึก"]):
-                                raise Exception(f"Evidence {i+1} ({evidence_type}) must include what is written/recorded")
-                        
-                        if any(keyword in evidence_type for keyword in ["dna", "DNA", "ลายนิ้ว", "เลือด"]):
-                            if not any(phrase in description for phrase in ["ของ", "ตรงกับ", "ไม่ตรงกับ", "เจ้าของ"]):
-                                raise Exception(f"Evidence {i+1} ({evidence_type}) must specify whose DNA/fingerprint it is")
-                        
-                        if any(keyword in evidence_type for keyword in ["cctv", "CCTV", "กล้อง", "วิดีโอ", "ภาพ"]):
-                            if not any(phrase in description for phrase in ["พบ", "แสดง", "ปรากฏ", "เห็น", "บันทึก"]):
-                                raise Exception(f"Evidence {i+1} ({evidence_type}) must specify who/what is seen in the footage")
 
                     # Validate character field structure
                     required_character_fields = ["name", "age", "role", "relationship", "characteristics", "secret", "motive", "alibi", "details"]
@@ -559,6 +540,17 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         if missing_fields:
                             raise Exception(f"Evidence {i+1} missing required fields: {missing_fields}")
                         
+                        # Validate description length and detail
+                        description = evidence.get("description", "")
+                        if len(description) < 30:
+                            raise Exception(f"Evidence {i+1} description too short ({len(description)} chars). Must include detailed content (minimum 30 characters)")
+                        
+                        # Check for generic/vague descriptions
+                        vague_indicators = ["พบ", "มี", "เป็น", "คือ", "อยู่", "ใน", "ที่"]
+                        description_words = description.split()
+                        if len(description_words) < 8:  # Less than 8 words is likely too brief
+                            raise Exception(f"Evidence {i+1} description too brief ({len(description_words)} words). Must include specific details, not generic descriptions")
+                        
                         # Validate image_generation_prompt is in English
                         prompt_text = evidence.get("image_generation_prompt", "")
                         if not prompt_text or len(prompt_text.strip()) < 10:
@@ -574,6 +566,31 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         valid_relevance = ["กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"]
                         if relevance not in valid_relevance:
                             raise Exception(f"Evidence {i+1} has invalid relevance '{relevance}'. Must be one of: {valid_relevance}")
+                        
+                        # Validate evidence content based on type
+                        evidence_type = evidence.get("type", "").lower()
+                        evidence_desc = evidence.get("description", "")
+                        
+                        # Documents/letters/recordings validation
+                        document_types = ["จดหมาย", "บันทึก", "ข้อความ", "โน๊ต", "ไดอารี่", "เอกสาร", "จดหมายรัก", "จดหมายข่มขู่"]
+                        if any(doc_type in evidence_type for doc_type in document_types):
+                            content_indicators = ["เขียนว่า", "ระบุว่า", "กล่าวว่า", "บันทึกว่า", "ข้อความว่า", "เนื้อหา", "ข้อความ"]
+                            if not any(indicator in evidence_desc for indicator in content_indicators):
+                                raise Exception(f"Evidence {i+1} ({evidence_type}) must include what is written/recorded - add specific content details")
+                        
+                        # DNA/fingerprint/blood validation
+                        dna_types = ["dna", "ลายนิ้ว", "เลือด", "พันธุกรรม", "ลายพิมพ์", "รอยนิ้ว"]
+                        if any(dna_type in evidence_type for dna_type in dna_types):
+                            ownership_indicators = ["ของ", "ตรงกับ", "ไม่ตรงกับ", "เจ้าของ", "เป็นของ", "มาจาก", "จาก"]
+                            if not any(indicator in evidence_desc for indicator in ownership_indicators):
+                                raise Exception(f"Evidence {i+1} ({evidence_type}) must specify whose DNA/fingerprint/blood it is - add ownership details")
+                        
+                        # CCTV/video/camera validation
+                        video_types = ["cctv", "กล้อง", "วิดีโอ", "ภาพ", "การบันทึก", "วงจรปิด", "ฟิล์ม"]
+                        if any(video_type in evidence_type for video_type in video_types):
+                            visual_indicators = ["พบ", "แสดง", "ปรากฏ", "เห็น", "บันทึก", "ตรวจพบ", "ปรากฏใน", "มองเห็น"]
+                            if not any(indicator in evidence_desc for indicator in visual_indicators):
+                                raise Exception(f"Evidence {i+1} ({evidence_type}) must specify who/what is seen in the footage - add visual details")
                         
                         # Check if Thai evidence fields contain English (simple check for common English words)
                         # thai_evidence_fields = ['type', 'description', 'location', 'analysis']
@@ -654,6 +671,14 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                     encountered_errors.add("invalid_relevance")
                 elif "missing required fields" in error_message:
                     encountered_errors.add("missing_fields")
+                elif "must include what is written" in error_message or "must include content" in error_message:
+                    encountered_errors.add("evidence_content")
+                elif "must specify whose DNA" in error_message or "add ownership details" in error_message:
+                    encountered_errors.add("dna_ownership")
+                elif "must specify who/what is seen" in error_message or "add visual details" in error_message:
+                    encountered_errors.add("video_details")
+                elif "description too short" in error_message or "description too brief" in error_message:
+                    encountered_errors.add("description_length")
                 else:
                     encountered_errors.add("other")
                 
@@ -679,6 +704,18 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                 
                 if "invalid_relevance" in encountered_errors:
                     error_fixes.append("**RELEVANCE:** Use only กายภาพ, จิตวิทยา, หลอกลวง, เทคโนโลยี")
+                
+                if "evidence_content" in encountered_errors:
+                    error_fixes.append("**EVIDENCE CONTENT:** For letters/documents/recordings, include specific details of what is written/recorded/said")
+                
+                if "dna_ownership" in encountered_errors:
+                    error_fixes.append("**DNA/FINGERPRINT:** For DNA/fingerprint/blood evidence, specify whose it is (ของคนไหน, ตรงกับใคร, เป็นของใคร)")
+                
+                if "video_details" in encountered_errors:
+                    error_fixes.append("**VIDEO/CCTV:** For video/CCTV/camera evidence, specify who/what is seen (เห็นใคร, แสดงอะไร, ปรากฏใคร)")
+                
+                if "description_length" in encountered_errors:
+                    error_fixes.append("**DESCRIPTION LENGTH:** All evidence descriptions must be detailed (minimum 30 characters, 8+ words) with specific information, not generic statements")
                 
                 if "other" in encountered_errors:
                     error_fixes.append(f"**OTHER:** {error_message[:80]}")
