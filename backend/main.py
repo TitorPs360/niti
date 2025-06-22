@@ -454,7 +454,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
     else:
         prompt = default_prompt
     
-    max_retries = 3
+    max_retries = 8
     for attempt in range(max_retries):
         try:
             async with aiohttp.ClientSession() as session:
