@@ -435,6 +435,12 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - ใส่เฉพาะข้อมูลที่จำเป็นสำหรับเกมเท่านั้น
 - ชื่อตัวละครและเหยื่อให้เป็นชื่อธรรมดาโดยไม่มีข้อความเพิ่มเติมใดๆ
 
+**ข้อกำหนดภาษา - สำคัญมาก:**
+- **ฟิลด์ที่ต้องเป็นภาษาอังกฤษเท่านั้น:** characteristics, image_generation_prompt
+- **ฟิลด์อื่นๆ ทั้งหมดต้องเป็นภาษาไทยเท่านั้น:** name, role, relationship, secret, motive, alibi, details, type, description, location, analysis, victim, cause_of_death
+- ห้ามใช้ภาษาอังกฤษในฟิลด์ที่กำหนดให้เป็นภาษาไทย
+- ห้ามใช้ภาษาไทยในฟิลด์ที่กำหนดให้เป็นภาษาอังกฤษ
+
 **ข้อกำหนดบังคับ - ไม่ปฏิบัติตามถือว่าไม่ผ่าน:**
 1. หลักฐาน (evidence) ต้องมี **อย่างน้อย 6 ชิ้น** ในรูปแบบ Array
 2. แต่ละหลักฐานต้องมีฟิลด์ครบ: type, description, location, relevance, image_generation_prompt, analysis  
@@ -528,6 +534,15 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         thai_chars = any('\u0e00' <= char <= '\u0e7f' for char in characteristics)
                         if thai_chars:
                             raise Exception(f"Character {i+1} characteristics must be in English, not Thai: {characteristics[:50]}...")
+                        
+                        # Check if other Thai fields contain English (simple check for common English words)
+                        # thai_fields = ['name', 'role', 'relationship', 'secret', 'motive', 'alibi', 'details']
+                        # english_indicators = ['the', 'and', 'of', 'to', 'a', 'in', 'is', 'that', 'with', 'for', 'as', 'was', 'on', 'are', 'it']
+                        
+                        # for field_name in thai_fields:
+                        #     field_value = person.get(field_name, '').lower()
+                        #     if any(word in field_value for word in english_indicators):
+                        #         raise Exception(f"Character {i+1} field '{field_name}' must be in Thai, not English: {person.get(field_name, '')[:50]}...")
 
                     # Validate evidence field structure  
                     required_evidence_fields = ["type", "description", "location", "relevance", "image_generation_prompt", "analysis"]
@@ -551,6 +566,15 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         valid_relevance = ["กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"]
                         if relevance not in valid_relevance:
                             raise Exception(f"Evidence {i+1} has invalid relevance '{relevance}'. Must be one of: {valid_relevance}")
+                        
+                        # Check if Thai evidence fields contain English (simple check for common English words)
+                        # thai_evidence_fields = ['type', 'description', 'location', 'analysis']
+                        # english_indicators = ['the', 'and', 'of', 'to', 'a', 'in', 'is', 'that', 'with', 'for', 'as', 'was', 'on', 'are', 'it']
+                        
+                        # for field_name in thai_evidence_fields:
+                        #     field_value = evidence.get(field_name, '').lower()
+                        #     if any(word in field_value for word in english_indicators):
+                        #         raise Exception(f"Evidence {i+1} field '{field_name}' must be in Thai, not English: {evidence.get(field_name, '')[:50]}...")
 
                     # Validate situation structure
                     situation = script.get("situation", {})
@@ -558,6 +582,15 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                     missing_situation_fields = [field for field in required_situation_fields if field not in situation]
                     if missing_situation_fields:
                         raise Exception(f"Situation missing required fields: {missing_situation_fields}")
+                    
+                    # Check if situation fields contain English (should be Thai)
+                    # thai_situation_fields = ["location", "time", "victim", "cause_of_death", "details"]
+                    # english_indicators = ['the', 'and', 'of', 'to', 'a', 'in', 'is', 'that', 'with', 'for', 'as', 'was', 'on', 'are', 'it']
+                    
+                    # for field_name in thai_situation_fields:
+                    #     field_value = situation.get(field_name, '').lower()
+                    #     if any(word in field_value for word in english_indicators):
+                    #         raise Exception(f"Situation field '{field_name}' must be in Thai, not English: {situation.get(field_name, '')[:50]}...")
 
                     # Validate resolution structure
                     resolution = script.get("resolution", {})
@@ -572,6 +605,15 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                     missing_components = [comp for comp in required_components if comp not in resolution_desc]
                     if missing_components:
                         raise Exception(f"Resolution description missing required components: {missing_components}")
+
+                    # Check if resolution fields contain English (should be Thai)
+                    # thai_resolution_fields = ["culprit", "description"]
+                    # english_indicators = ['the', 'and', 'of', 'to', 'a', 'in', 'is', 'that', 'with', 'for', 'as', 'was', 'on', 'are', 'it']
+                    
+                    # for field_name in thai_resolution_fields:
+                    #     field_value = resolution.get(field_name, '').lower()
+                    #     if any(word in field_value for word in english_indicators):
+                    #         raise Exception(f"Resolution field '{field_name}' must be in Thai, not English: {resolution.get(field_name, '')[:50]}...")
 
                     # Validate culprit exists in people list
                     culprit_name = resolution.get("culprit", "")
@@ -589,6 +631,11 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                 raise e
             else:
                 # Add stronger field name warnings to prompt for retry
+                # error_message = str(e)
+                # language_warning = ""
+                # if "must be in Thai" in error_message or "must be in English" in error_message:
+                #     language_warning = "\n**LANGUAGE ERROR - USE CORRECT LANGUAGE:**\n- characteristics และ image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น\n- ฟิลด์อื่นๆ ทั้งหมดต้องเป็นภาษาไทยเท่านั้น: name, role, relationship, secret, motive, alibi, details, type, description, location, analysis, victim, cause_of_death"
+                
                 prompt += f"\n\n**CRITICAL ERROR DETECTED - RETRY WITH CORRECT FIELD NAMES:**\nPrevious attempt failed: {str(e)}\nUSE EXACT FIELD NAMES: name, age, role, relationship, characteristics, secret, motive, alibi, details\nDO NOT USE: occupation, description, job, work, personality, character"
                 print(f"Retrying script generation with enhanced prompt (attempt {attempt + 2}/{max_retries})")
                 continue
