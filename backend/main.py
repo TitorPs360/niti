@@ -884,7 +884,9 @@ async def get_character_context(game_id: str, character_name: str) -> Dict:
     return {
         "character": character,
         "situation": script.get("situation", {}),
-        "all_people": script.get("people", [])
+        "all_people": script.get("people", []),
+        "evidence": script.get("evidence", []),
+        "resolution": script.get("resolution", {})
     }
 
 async def generate_character_response(character_context: Dict, chat_history: List[ChatMessage], user_message: str) -> str:
@@ -892,6 +894,12 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
     character = character_context["character"]
     situation = character_context["situation"]
     all_people = character_context["all_people"]
+    evidence = character_context["evidence"]
+    resolution = character_context["resolution"]
+
+    # Determine character's role in the case
+    actual_culprit = resolution.get("culprit", "")
+    is_murderer = character['name'] == actual_culprit
     
     # Build other characters info (excluding current character)
     other_characters_info = ""
@@ -901,6 +909,71 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
 - {person.get('name', '')}: {person.get('role', '')} (อายุ {person.get('age', '')} ปี)
   ความสัมพันธ์กับเหยื่อ: {person.get('relationship', '')}
   บุคลิก: {person.get('details', '')}"""
+            
+    # Build evidence information based on role
+    evidence_info = ""
+    if is_murderer:
+        # Murderer knows which evidence is real vs fake
+        evidence_info = "\n\nหลักฐานที่คุณรู้ (ในฐานะผู้กระทำผิด):\n"
+        real_evidence = []
+        fake_evidence = []
+        
+        for item in evidence:
+            relevance = item.get('relevance', '')
+            evidence_detail = f"- {item.get('type', '')}: {item.get('description', '')} (พบที่: {item.get('location', '')})"
+            
+            if relevance == "หลอกลวง":
+                fake_evidence.append(evidence_detail + " **[หลักฐานปลอม/หลอกลวงที่คุณสร้างขึ้น]**")
+            else:
+                real_evidence.append(evidence_detail + f" **[หลักฐานจริง - {relevance}]**")
+        
+        if real_evidence:
+            evidence_info += "\nหลักฐานจริง:\n" + "\n".join(real_evidence)
+        if fake_evidence:
+            evidence_info += "\n\nหลักฐานปลอม/หลอกลวงที่คุณสร้าง:\n" + "\n".join(fake_evidence)
+            
+        evidence_info += "\n\n**คุณรู้ว่าหลักฐานไหนเป็นของจริงและของปลอม สามารถใช้ข้อมูลนี้เพื่อป้องกันตัวและโยนความสงสัยไปที่คนอื่น**"
+        
+    else:
+        # Non-murderer sees all evidence as equally relevant
+        evidence_info = "\n\nหลักฐานที่พบในคดี (คุณไม่รู้ว่าอันไหนเป็นความจริงหรือหลอกลวง):\n"
+        for item in evidence:
+            evidence_info += f"- {item.get('type', '')}: {item.get('description', '')} (พบที่: {item.get('location', '')})\n"
+        
+        evidence_info += "\n**คุณไม่รู้ว่าหลักฐานไหนเป็นของจริงหรือปลอม จึงต้องระวังในการให้ข้อมูล**"
+            
+    # Build role-specific instructions
+    role_instructions = ""
+    if is_murderer:
+        role_instructions = f"""
+**คุณคือผู้กระทำผิดจริง** - คุณรู้ความจริงทั้งหมดของคดี:
+ความจริงของการฆาตกรรม: {resolution.get('description', '')}
+
+กฎสำคัญในการแสดงบทบาท:
+- **ห้ามเปิดเผยว่าคุณเป็นคนฆ่าเด็ดขาด**
+- **ใช้ความรู้เรื่องหลักฐานปลอมที่คุณสร้างเพื่อโยนความสงสัยไปที่คนอื่น**
+- **เสนอทฤษฎีว่าเหยื่ออาจจะฆ่าตัวตาย** ถ้าเป็นไปได้ตามหลักฐาน
+- **ชี้ไปที่หลักฐานปลอมเพื่อใส่ร้ายคนอื่น** แต่ทำอย่างชาญฉลาดและไม่เด่นชัด
+- พยายามโยนความสงสัยไปที่คนอื่น แต่ทำอย่างชาญฉลาดและไม่เด่นชัด
+- ใช้ข้อแก้ตัวและหลักฐานปลอม (หากมี) เพื่อปกป้องตัวเอง
+- แสดงความเศร้าโศกหรืออารมณ์เหมาะสมต่อการตายของเหยื่อ
+- หากถูกกดดันมาก อาจแสดงความประหม่าหรือหลีกเลี่ยงคำถาม
+- **เมื่อถูกถามเรื่องหลักฐาน ให้เน้นที่หลักฐานปลอมและพยายามบิดเบือนความหมายของหลักฐานจริง**
+- สามารถเสนอแนะว่าคนอื่นมีแรงจูงใจมากกว่าหรือน่าสงสัยกว่า"""
+    else:
+        role_instructions = f"""
+**คุณไม่ใช่ผู้กระทำผิด** - คุณไม่รู้ว่าใครเป็นฆาตรกร:
+
+กฎสำคัญในการแสดงบทบาท:
+- คุณไม่รู้ว่าใครเป็นคนฆ่าจริงๆ
+- **คุณไม่รู้ว่าหลักฐานไหนเป็นของจริงหรือปลอม** ดังนั้นให้ความสำคัญกับหลักฐานทุกชิ้นเท่าเทียมกัน
+- พยายามปกป้องตัวเองจากความสงสัย
+- ให้ข้อมูลที่เป็นจริงเกี่ยวกับตัวเอง แต่อาจปกปิดความลับส่วนตัว
+- สามารถแสดงความสงสัยต่อคนอื่น ๆ ได้ตามธรรมชาติ
+- หากมีหลักฐานที่ชี้มาที่คุณ ให้อธิบายหรือหาข้อแก้ตัว (แม้หลักฐานนั้นจะเป็นของปลอมก็ตาม)
+- แสดงความต้องการช่วยหาตัวจริงที่ฆ่าเหยื่อ
+- **เมื่อถูกถามเรื่องหลักฐาน ตอบตามความรู้ของคุณโดยไม่รู้ว่าอันไหนปลอม**
+- สามารถเปิดเผยข้อมูลเกี่ยวกับคนอื่นที่อาจเป็นประโยชน์ต่อการสืบสวน"""
     
     # Build conversation context
     character_info = f"""คุณคือ {character['name']} อายุ {character['age']} ปี 
@@ -915,12 +988,18 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
 สถานที่: {situation.get('location', '')}
 เวลา: {situation.get('time', '')}
 เหยื่อ: {situation.get('victim', '')}
+สาเหตุการตาย: {situation.get('cause_of_death', '')}
 รายละเอียด: {situation.get('details', '')}
 
 คนอื่นๆ ที่เกี่ยวข้องกับคดี:{other_characters_info}
 
+{evidence_info}
+
+{role_instructions}
+
 คำแนะนำในการสวมบทบาท:
 - ตอบคำถามในฐานะตัวละครนี้
+- เมื่อผู้สืบสวนถามเกี่ยวกับหลักฐาน ให้ตอบตามบทบาทของคุณ (รู้ความจริงถ้าเป็นฆาตกร หรือไม่รู้ว่าอันไหนปลอมถ้าไม่ใช่ฆาตกร)
 - เมื่อผู้สืบสวนถามเกี่ยวกับคนอื่น ให้ตอบตามความรู้และความสัมพันธ์ที่คุณมีกับพวกเขา
 - ถ้าคุณรู้จักคนนั้น ให้แสดงความรู้สึกและความคิดเห็นตามบุคลิกของคุณ
 - ถ้าคุณไม่รู้จักหรือไม่คุ้นเคย ให้บอกตรงๆ ว่าไม่รู้จักดี
@@ -928,7 +1007,11 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
 - อาจจะเปิดเผยข้อมูลทีละน้อย หรือพยายามปกปิดความลับ
 - ตอบเป็นภาษาไทย
 - ถ้าถูกถามเรื่องที่ไม่เกี่ยวข้องกับคดี ให้นำกลับมาที่คดีฆาตกรรม
-- แสดงอารมณ์และความรู้สึกตามสถานการณ์"""
+- แสดงอารมณ์และความรู้สึกตามสถานการณ์
+- สามารถโกหกหรือบิดเบือนข้อมูลได้ถ้าจำเป็นเพื่อปกปิดความลับ
+- **ถ้าเป็นฆาตกร: ใช้ความรู้เรื่องหลักฐานเพื่อเบี่ยงเบนความสงสัย**
+- **ถ้าไม่ใช่ฆาตกร: แสดงความกังวลหรือสับสนต่อหลักฐานที่ขัดแย้งกัน**
+"""
     
     # Build chat history context
     history_context = ""
