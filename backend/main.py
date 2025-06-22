@@ -446,10 +446,10 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
 
 *RETURN ONLY VALID JSON - NO EXPLANATIONS OR COMMENTS OUTSIDE JSON*"""
-    
+
     # Combine default prompt with extra prompt if provided
     if extra_prompt:
-        prompt = default_prompt + "\n\nเพิ่มเติม: " + extra_prompt
+        prompt = default_prompt + "\n\nเพิ่มเติม: " + f"**{extra_prompt}**"
     else:
         prompt = default_prompt
     
@@ -497,7 +497,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                     if evidence_count < 6:
                         raise Exception(f"Invalid evidence count: {evidence_count}. Must be at least 6 pieces of evidence.")
                     
-
                     # Validate character field structure
                     required_character_fields = ["name", "age", "role", "relationship", "characteristics", "secret", "motive", "alibi", "details"]
                     forbidden_character_fields = ["occupation", "description", "job", "work", "personality", "character"]
@@ -685,7 +684,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                 # Reset to base prompt and add ALL encountered error fixes
                 prompt = default_prompt
                 if extra_prompt:
-                    prompt += "\n\nเพิ่มเติม: " + extra_prompt
+                    prompt += "\n\nเพิ่มเติม: " + f"**{extra_prompt}**"
                 
                 # Build cumulative error corrections
                 error_fixes = []
