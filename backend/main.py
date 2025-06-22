@@ -364,14 +364,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "analysis": "หลักฐานหลักที่พิสูจน์วิธีการฆ่า"
         },
         {
-            "type": "จดหมายข่มขู่",
-            "description": "จดหมายข่มขู่ลายมือหญิงส่งมา 3 วันก่อน",
-            "location": "ในกระเป๋าเอกสารของเหยื่อ",
-            "relevance": "หลอกลวง",
-            "image_generation_prompt": "Photo of a threatening letter written in Thai, feminine handwriting, on cream paper",
-            "analysis": "ลายมือปลอมเพื่อใส่ร้ายภรรยา"
-        },
-        {
             "type": "ใบเสร็จ",
             "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อ 2 วันก่อนเกิดเหตุ",
             "location": "ในกระเป๋าถือของเลขานุการ",
@@ -386,22 +378,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "relevance": "เทคโนโลยี",
             "image_generation_prompt": "Screenshot of phone call log showing recent calls, mobile phone interface, showing timestamp 22:00, digital evidence style",
             "analysis": "แสดงว่าเหยื่อยังมีชีวิตตอน 22:00 น."
-        },
-        {
-            "type": "ไดอารี่ส่วนตัว",
-            "description": "ไดอารี่ของเหยื่อเขียนเมื่อ 1 สัปดาห์ก่อน บันทึกความกลัวและความสงสัย",
-            "location": "ลิ้นชักโต๊ะทำงานในบ้าน",
-            "relevance": "จิตวิทยา",
-            "image_generation_prompt": "Photo of an open diary with handwritten Thai text, personal thoughts, on a wooden desk",
-            "analysis": "เผยความรู้สึกของเหยื่อก่อนเสียชีวิต"
-        },
-        {
-            "type": "ลายนิ้วมือบนขวดไวน์",
-            "description": "ลายนิ้วมือที่พบบนขวดไวน์ไม่ตรงกับเหยื่อหรือใครในครอบครัว",
-            "location": "ขวดไวน์ในห้องครัว",
-            "relevance": "กายภาพ",
-            "image_generation_prompt": "Close-up forensic photo of fingerprints on wine bottle, crime scene evidence photography",
-            "analysis": "ลายนิ้วมือของผู้กระทำผิดที่เหลือไว้"
         },
         {
             "type": "กล้องวงจรปิด",
@@ -441,8 +417,6 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - การปกปิดหลักฐาน: หลักฐานปลอม, หลักฐานที่ซ่อน, การทำลายหลักฐาน, การใช้เทคโนโลยีในการปกปิด
 - ข้อผิดพลาดร้ายแรง: สิ่งที่ทำให้ผู้กระทำผิดถูกจับได้ แม้จะมีแผนการที่สมบูรณ์แบบ
 
-**สำคัญมาก: ต้องสร้างตัวละคร 4-6 คน และหลักฐาน 6-12 ชิ้นครบถ้วน (ห้ามน้อยกว่า 6 ชิ้น) พร้อมข้อมูลครบทุกฟิลด์**
-
 เช็คให้แน่ใจว่าเมื่อผู้เล่นอ่านหลักฐานและสอบถามตัวละคร พวกเขาจะสามารถรวบรวมข้อมูลและเชื่อมโยงเหตุการณ์ต่างๆ เพื่อค้นหาความจริงได้
 
 **ข้อกำหนดเพิ่มเติมที่สำคัญ:**
@@ -453,7 +427,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 
 **ข้อกำหนดภาษา - สำคัญมาก:**
 - **ฟิลด์ที่ต้องเป็นภาษาอังกฤษเท่านั้น:** characteristics, image_generation_prompt
-- **ฟิลด์อื่นๆ ทั้งหมดต้องเป็นภาษาไทยเท่านั้น:** name, role, relationship, secret, motive, alibi, details, type, description, location, analysis, victim, cause_of_death
+- **ฟิลด์อื่นๆ ทั้งหมดต้องเป็นภาษาไทยเท่านั้น:**
 
 **ข้อกำหนดบังคับ - ไม่ปฏิบัติตามถือว่าไม่ผ่าน:**
 1. หลักฐาน (evidence) ต้องมี **อย่างน้อย 6 ชิ้น** ในรูปแบบ Array
