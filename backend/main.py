@@ -365,7 +365,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         },
         {
             "type": "ใบเสร็จ",
-            "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อ 2 วันก่อนเกิดเหตุ",
+            "description": "ใบเสร็จซื้อยาขจัดแมลงที่มีส่วนผสมไซยาไนด์ วันที่ซื้อคือ 2 วันก่อนเกิดเหตุ",
             "location": "ในกระเป๋าถือของเลขานุการ",
             "relevance": "กายภาพ",
             "image_generation_prompt": "Photo of a receipt, showing pesticide purchase, crumpled paper texture",
@@ -381,7 +381,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         },
         {
             "type": "กล้องวงจรปิด",
-            "description": "บันทึกภาพจากกล้องลิฟต์ แสดงเลขานุการขึ้นมาชั้น 15 เวลา 21:45 น.",
+            "description": "บันทึกภาพจากกล้องลิฟต์ พบว่าเลขานุการขึ้นมาชั้น 15 เวลา 21:45 น.",
             "location": "ระบบรักษาความปลอดภัยของโรงแรม",
             "relevance": "เทคโนโลยี",
             "image_generation_prompt": "CCTV footage screenshot showing person in elevator, elevator show floor 15 number, timestamp visible, timestamps show 21:45, security camera style",
@@ -512,7 +512,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                                 raise Exception(f"Evidence {i+1} ({evidence_type}) must specify whose DNA/fingerprint it is")
                         
                         if any(keyword in evidence_type for keyword in ["cctv", "CCTV", "กล้อง", "วิดีโอ", "ภาพ"]):
-                            if not any(phrase in description for phrase in ["แสดง", "ปรากฏ", "เห็น", "บันทึก"]):
+                            if not any(phrase in description for phrase in ["พบ", "แสดง", "ปรากฏ", "เห็น", "บันทึก"]):
                                 raise Exception(f"Evidence {i+1} ({evidence_type}) must specify who/what is seen in the footage")
 
                     # Validate character field structure
