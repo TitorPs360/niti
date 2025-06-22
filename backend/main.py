@@ -287,12 +287,29 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
    - การเงิน/ธุรกิจ (หนี้สิน/ล้มละลาย/แบล็กเมล์)
    
 4. **หลักฐาน ต้องสร้าง 6-12 ชิ้นเต็ม (ห้ามน้อยกว่า 6 ชิ้น)**:
-   - **กายภาพ (3-4 ชิ้น)**: DNA/ลายนิ้วมือ/เครื่องมือฆาตกรรม/ร่องรอยการต่อสู้
-   - **จิตวิทยา (2-3 ชิ้น)**: จดหมาย/ไดอารี่/ข้อความ/รูปภาพส่วนตัว
-   - **หลอกลวง (2-3 ชิ้น)**: หลักฐานปลอม/ข้อมูลเท็จ/พยานเท็จ
-   - **เทคโนโลยี (2-3 ชิ้น)**: บันทึกโทร/CCTV/GPS/ข้อมูลคอมพิวเตอร์
-   - **relevance ต้องเป็นหนึ่งในสี่ประเภทนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"**
-   - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น **NEED TO BE IN ENGLISH** เพื่อให้สามารถสร้างภาพได้
+   
+   **หลักฐานกายภาพ (3-4 ชิ้น)**:
+   - **DNA/เลือด**: ระบุเจ้าของ หรือ "ไม่ตรงกับใครในข้อมูล" หรือ "ตรงกับ [ชื่อคน]"
+   - **ลายนิ้วมือ**: ระบุเจ้าของ หรือ "ไม่ตรงกับเหยื่อหรือผู้ต้องสงสัย" หรือ "ตรงกับ [ชื่อคน]"
+   - **เครื่องมือฆาตกรรม/อาวุธ**: ระบุร่องรอย "มีลายนิ้วมือของ [ชื่อ]" หรือ "ถูกเช็ดสะอาด"
+   - **ใบเสร็จ/เอกสาร**: ระบุชื่อผู้ซื้อ วันที่ เวลา สิ่งที่ซื้อ และสถานที่
+
+   **หลักฐานจิตวิทยา (2-3 ชิ้น)**:
+   - **จดหมาย/โน้ต**: เขียนเนื้อหาที่แน่นอน เช่น "เขียนว่า 'คุณจะต้องนำเงินมาให้ภายในวันพรุ่งนี้ ไม่งั้นคลิปของคุณจะไปอยู่บนเน็ต'" หรือ "ตัวอักษรเบลอไม่สามารถอ่านได้ชัดเจน เห็นแค่คำว่า '...แก...ตาย...'"
+   - **ไดอารี่**: เขียนเนื้อหาที่แน่นอน วันที่ และอารมณ์ เช่น "วันที่ 15 ม.ค. เขียนว่า 'ฉันกลัวมากขึ้นทุกวัน รู้สึกว่ามีคนตามสังเกตการณ์'"
+   - **รูปภาพ/วิดีโอ**: ระบุใครอยู่ในรูป สถานที่ เวลา และกิริยาท่าทาง
+
+   **หลักฐานหลอกลวง (2-3 ชิ้น)**:
+   - เหมือนกับหลักฐานจริง แต่มีการปลอมแปลงหรือสร้างขึ้นเพื่อหลอกลวง ทำให้ดูเหมือนเป็นหลักฐานจริง มีความน่าเชื่อถือสูง รายละเอียดต้องครบถ้วน
+
+   **หลักฐานเทคโนโลยี (2-3 ชิ้น)**:
+   - **บันทึกโทรศัพท์**: ระบุเบอร์ที่โทร วันที่ เวลา ระยะเวลาการสนทนา เช่น "โทรหา [ชื่อ] เวลา 21:45 น. พูด 3 นาที 27 วินาที"
+   - **CCTV**: ระบุใครปรากฏ สถานที่ เวลา กิริยาท่าทาง เช่น "แสดงผู้หญิงใส่เสื้อสีดำเดินเข้าลิฟต์ ชั้น 15 เวลา 21:45 น. มีอาการประหม่า"
+   - **GPS/ข้อมูลตำแหน่ง**: ระบุตำแหน่งที่แน่นอน เวลา
+   - **ข้อมูลคอมพิวเตอร์**: ระบุไฟล์ เวลาที่เข้าถึง การลบข้อมูล
+
+   **สำคัญ: relevance ต้องเป็นหนึ่งในสี่ประเภทนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"**
+   **image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น**
 
 5. ความสัมพันธ์: ซับซ้อนขัดแย้ง มีศัตรูหลายคน เพื่อให้โยนความผิดได้
 
@@ -316,7 +333,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "38",
             "role": "ภรรยาของเหยื่อ",
             "relationship": "คู่สมรสที่มีปัญหา",
-            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed", // คำอธิบายสำหรับสร้างภาพ ต้องเป็นภาษาอังกฤษ
+            "characteristics": "An elegant Thai woman in her late 30s, wearing a sophisticated black evening dress, diamond jewelry, perfectly styled hair in an updo, standing in a luxury hotel lobby, dramatic lighting, professional photography style, high quality, detailed",
             "secret": "เธอมีชู้กับคนขับรถและวางแผนจะหย่าร้าง แต่กลัวว่าจะไม่ได้มรดก",
             "motive": "ต้องการเงินมรดกและเสรีภาพจากชีวิตแต่งงาน", // แรงจูงใจทางจิตวิทยาที่ลึกซึ้ง
             "alibi": "อยู่ในห้องน้ำผู้หญิงตอนเกิดเหตุ มีสตาฟโรงแรมเห็น", // หลักฐานที่อยู่อาจจะโกหกได้
@@ -327,7 +344,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
             "age": "29",
             "role": "เลขานุการส่วนตัว",
             "relationship": "ผู้ใต้บังคับบัญชาที่ถูกคุกคาม",
-            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style", // คำอธิบายสำหรับสร้างภาพ ต้องเป็นภาษาอังกฤษ
+            "characteristics": "A professional Thai woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style",
             "secret": "เธอถูกเหยื่อล่วงละเมิดทางเพศและบังคับให้ทำธุรกิจผิดกฎหมาย",
             "motive": "ต้องการแก้แค้นและหลุดพ้นจากการถูกควบคุม", // แรงจูงใจทางจิตวิทยาที่ลึกซึ้ง
             "alibi": "อยู่ที่โต๊ะแถวหน้า พูดคุยกับแขกเข้าร่วมงาน", // หลักฐานที่อยู่อาจจะโกหกได้
@@ -446,7 +463,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 
 **ข้อกำหนดชื่อฟิลด์ตัวละคร - ห้ามใช้ชื่อฟิลด์อื่น:**
 - ต้องมีฟิลด์ครบถ้วน: name, age, role, relationship, characteristics, secret, motive, alibi, details
-- ใช้ "characteristics" ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
+- ใช้ "characteristics" ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย) บ่งบอกลักษณะตัวละครและสิ่งที่เขา/เธอสวมใส่สำหรับการสร้างภาพเช่น  "A professional asain woman in her late 20s, wearing a conservative business suit, glasses, holding documents, serious expression, office environment background, corporate photography style"
 
 **ข้อกำหนดฟิลด์หลักฐาน - ห้ามใช้ชื่อฟิลด์อื่น:**
 - ต้องมีฟิลด์ครบถ้วน: type, description, location, relevance, image_generation_prompt, analysis
@@ -503,6 +520,26 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         raise Exception(f"Invalid character count: {character_count}. Must be between 4 and 6 characters.")
                     if evidence_count < 6:
                         raise Exception(f"Invalid evidence count: {evidence_count}. Must be at least 6 pieces of evidence.")
+                    
+                    # Validate that evidence descriptions are detailed enough
+                    for i, evidence in enumerate(script.get("evidence", [])):
+                        description = evidence.get("description", "")
+                        if len(description) < 30:  # Minimum length check for detailed descriptions
+                            raise Exception(f"Evidence {i+1} description too short. Must include detailed content (what's written, whose DNA/fingerprint, who's in CCTV, etc.)")
+                        
+                        # Check for specific detail patterns based on evidence type
+                        evidence_type = evidence.get("type", "").lower()
+                        if any(keyword in evidence_type for keyword in ["จดหมาย", "โน้ต", "ไดอารี่", "บันทึก"]):
+                            if not any(phrase in description for phrase in ["เขียนว่า", "ข้อความ", "เนื้อหา", "บันทึก"]):
+                                raise Exception(f"Evidence {i+1} ({evidence_type}) must include what is written/recorded")
+                        
+                        if any(keyword in evidence_type for keyword in ["dna", "DNA", "ลายนิ้ว", "เลือด"]):
+                            if not any(phrase in description for phrase in ["ของ", "ตรงกับ", "ไม่ตรงกับ", "เจ้าของ"]):
+                                raise Exception(f"Evidence {i+1} ({evidence_type}) must specify whose DNA/fingerprint it is")
+                        
+                        if any(keyword in evidence_type for keyword in ["cctv", "CCTV", "กล้อง", "วิดีโอ", "ภาพ"]):
+                            if not any(phrase in description for phrase in ["แสดง", "ปรากฏ", "เห็น", "บันทึก"]):
+                                raise Exception(f"Evidence {i+1} ({evidence_type}) must specify who/what is seen in the footage")
 
                     # Validate character field structure
                     required_character_fields = ["name", "age", "role", "relationship", "characteristics", "secret", "motive", "alibi", "details"]
