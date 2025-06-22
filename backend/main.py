@@ -449,6 +449,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 - ต้องมีฟิลด์ครบถ้วน: name, age, role, relationship, characteristics, secret, motive, alibi, details
 
 **ข้อกำหนดฟิลด์หลักฐาน - ห้ามใช้ค่าอื่น:**
+- type ต้องเป็นประเภทที่ชัดเจน เช่น "DNA", "จดหมายข่มขู่", "ใบเสร็จ", "บันทึกการโทรศัพท์", "ไดอารี่ส่วนตัว", "ลายนิ้ว", "กล้องวงจรปิด"
 - relevance ต้องเป็นหนึ่งในนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"
 - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
 
