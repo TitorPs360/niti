@@ -292,6 +292,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
    - **หลอกลวง (2-3 ชิ้น)**: หลักฐานปลอม/ข้อมูลเท็จ/พยานเท็จ
    - **เทคโนโลยี (2-3 ชิ้น)**: บันทึกโทร/CCTV/GPS/ข้อมูลคอมพิวเตอร์
    - แต่ละชิ้นต้องมี: type, description, location, relevance, image_generation_prompt, analysis
+   - **relevance ต้องเป็นหนึ่งในสี่ประเภทนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"**
    - image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น **NEED TO BE IN ENGLISH** เพื่อให้สามารถสร้างภาพได้
 
 5. ความสัมพันธ์: ซับซ้อนขัดแย้ง มีศัตรูหลายคน เพื่อให้โยนความผิดได้
@@ -337,6 +338,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
     ],
     "evidence": [
         // **สำคัญ: ต้องสร้างหลักฐาน 6-12 ชิ้นครบถ้วน ตามหมวดหมู่ที่กำหนด**
+        // **relevance ต้องเป็น: "กายภาพ", "จิตวิทยา", "หลอกลวง", หรือ "เทคโนโลยี" เท่านั้น**
         {
             "type": "แก้วไวน์ที่มีร่องรอยยาพิษ",
             "description": "แก้วไวน์แดงที่พบในห้องของเหยื่อ มีร่องรอยยาพิษไซยาไนด์",
@@ -441,10 +443,14 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
 
 **ข้อกำหนดชื่อฟิลด์ตัวละคร - ห้ามใช้ชื่อฟิลด์อื่น:**
 - ใช้ "role" ไม่ใช่ "occupation", "job", "work", "position"
-- ใช้ "characteristics" ไม่ใช่ "description", "appearance", "looks"  
+- ใช้ "characteristics" ไม่ใช่ "description", "appearance", "looks" และต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
 - ใช้ "details" ไม่ใช่ "personality", "character", "traits"
 - ใช้ "relationship" ไม่ใช่ "relation", "connection"
 - ต้องมีฟิลด์ครบถ้วน: name, age, role, relationship, characteristics, secret, motive, alibi, details
+
+**ข้อกำหนดฟิลด์หลักฐาน - ห้ามใช้ค่าอื่น:**
+- relevance ต้องเป็นหนึ่งในนี้เท่านั้น: "กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"
+- image_generation_prompt ต้องเป็นภาษาอังกฤษเท่านั้น (ห้ามใช้ภาษาไทย)
 
 *RETURN ONLY VALID JSON - NO EXPLANATIONS OR COMMENTS OUTSIDE JSON*"""
     
