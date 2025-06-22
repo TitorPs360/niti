@@ -1013,13 +1013,33 @@ async def generate_character_response(character_context: Dict, chat_history: Lis
 - **ถ้าไม่ใช่ฆาตกร: แสดงความกังวลหรือสับสนต่อหลักฐานที่ขัดแย้งกัน**
 """
     
-    # Build chat history context
+    # Build chat history context with smart truncation
     history_context = ""
     if chat_history:
         history_context = "\n\nประวัติการสนทนา:\n"
-        for msg in chat_history[-5:]:  # Last 5 messages for context
+        # Limit to last 8 messages and truncate content to prevent overflow
+        recent_messages = chat_history[-8:]
+        max_msg_length = 250  # Max characters per message
+        max_total_length = 2000  # Max total characters for history
+        
+        temp_history = ""
+        for msg in recent_messages:
             role_name = "ผู้สืบสวน" if msg.role == "user" else character['name']
-            history_context += f"{role_name}: {msg.content}\n"
+            
+            # Truncate long messages
+            content = msg.content
+            if len(content) > max_msg_length:
+                content = content[:max_msg_length] + "..."
+            
+            message_line = f"{role_name}: {content}\n"
+            
+            # Check if adding this message would exceed total limit
+            if len(temp_history + message_line) > max_total_length:
+                break
+                
+            temp_history += message_line
+        
+        history_context += temp_history
     
     prompt = f"""{character_info}
 
