@@ -494,7 +494,7 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                     if character_count < 4 or character_count > 6:
                         raise Exception(f"Invalid character count: {character_count}. Must be between 4 and 6 characters.")
                     if evidence_count < 6:
-                        raise Exception(f"Invalid evidence count: {evidence_count}. Must be at least 8 pieces of evidence.")
+                        raise Exception(f"Invalid evidence count: {evidence_count}. Must be at least 6 pieces of evidence.")
 
                     # Validate character field structure
                     required_character_fields = ["name", "age", "role", "relationship", "characteristics", "secret", "motive", "alibi", "details"]
@@ -511,6 +511,16 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         forbidden_found = person_fields.intersection(forbidden_character_fields)
                         if forbidden_found:
                             raise Exception(f"Character {i+1} uses forbidden field names: {list(forbidden_found)}. Use correct field names: role (not occupation), characteristics (not description)")
+                        
+                        # Validate characteristics is in English
+                        characteristics = person.get("characteristics", "")
+                        if not characteristics or len(characteristics.strip()) < 20:
+                            raise Exception(f"Character {i+1} has invalid characteristics: must be detailed English description for image generation")
+                        
+                        # Check if characteristics appears to be in Thai (contains Thai characters)
+                        thai_chars = any('\u0e00' <= char <= '\u0e7f' for char in characteristics)
+                        if thai_chars:
+                            raise Exception(f"Character {i+1} characteristics must be in English, not Thai: {characteristics[:50]}...")
 
                     # Validate evidence field structure  
                     required_evidence_fields = ["type", "description", "location", "relevance", "image_generation_prompt", "analysis"]
@@ -518,6 +528,49 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                         missing_fields = [field for field in required_evidence_fields if field not in evidence]
                         if missing_fields:
                             raise Exception(f"Evidence {i+1} missing required fields: {missing_fields}")
+                        
+                        # Validate image_generation_prompt is in English
+                        prompt_text = evidence.get("image_generation_prompt", "")
+                        if not prompt_text or len(prompt_text.strip()) < 10:
+                            raise Exception(f"Evidence {i+1} has invalid image_generation_prompt: must be detailed English description")
+                        
+                        # Check if image_generation_prompt is in Thai (contains Thai characters)
+                        thai_chars_in_prompt = any('\u0e00' <= char <= '\u0e7f' for char in prompt_text)
+                        if thai_chars_in_prompt:
+                            raise Exception(f"Evidence {i+1} image_generation_prompt must be in English, not Thai: {prompt_text[:50]}...")
+                        
+                        # Validate relevance category
+                        relevance = evidence.get("relevance", "")
+                        valid_relevance = ["กายภาพ", "จิตวิทยา", "หลอกลวง", "เทคโนโลยี"]
+                        if relevance not in valid_relevance:
+                            raise Exception(f"Evidence {i+1} has invalid relevance '{relevance}'. Must be one of: {valid_relevance}")
+
+                    # Validate situation structure
+                    situation = script.get("situation", {})
+                    required_situation_fields = ["location", "time", "victim", "age", "cause_of_death", "details"]
+                    missing_situation_fields = [field for field in required_situation_fields if field not in situation]
+                    if missing_situation_fields:
+                        raise Exception(f"Situation missing required fields: {missing_situation_fields}")
+
+                    # Validate resolution structure
+                    resolution = script.get("resolution", {})
+                    required_resolution_fields = ["culprit", "description"]
+                    missing_resolution_fields = [field for field in required_resolution_fields if field not in resolution]
+                    if missing_resolution_fields:
+                        raise Exception(f"Resolution missing required fields: {missing_resolution_fields}")
+                    
+                    # Validate resolution description contains key components
+                    resolution_desc = resolution.get("description", "")
+                    required_components = ["แรงจูงใจ", "กลอุบาย", "ขั้นตอนฆาตกรรม", "การปกปิดหลักฐาน", "ข้อผิดพลาด"]
+                    missing_components = [comp for comp in required_components if comp not in resolution_desc]
+                    if missing_components:
+                        raise Exception(f"Resolution description missing required components: {missing_components}")
+
+                    # Validate culprit exists in people list
+                    culprit_name = resolution.get("culprit", "")
+                    character_names = [person.get("name", "") for person in script.get("people", [])]
+                    if culprit_name not in character_names:
+                        raise Exception(f"Culprit '{culprit_name}' not found in character list: {character_names}")
 
                     print(f"Script validation passed on attempt {attempt + 1}: {character_count} characters, {evidence_count} evidence pieces")
                     return script
