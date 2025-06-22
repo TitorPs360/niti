@@ -454,6 +454,8 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
         prompt = default_prompt
     
     max_retries = 8
+    encountered_errors = set()  # Track all error types encountered
+    
     for attempt in range(max_retries):
         try:
             async with aiohttp.ClientSession() as session:
@@ -636,28 +638,55 @@ async def generate_script(extra_prompt: Optional[str]) -> Dict:
                 # Last attempt failed, raise the exception
                 raise e
             else:
-                # Reset to base prompt and add concise error guidance (prevent prompt growth)
+                # Track this error type
+                error_message = str(e)
+                if "forbidden field names" in error_message:
+                    encountered_errors.add("forbidden_fields")
+                elif "must be in Thai" in error_message:
+                    encountered_errors.add("wrong_thai")
+                elif "must be in English" in error_message:
+                    encountered_errors.add("wrong_english")
+                elif "Invalid evidence count" in error_message:
+                    encountered_errors.add("evidence_count")
+                elif "Invalid character count" in error_message:
+                    encountered_errors.add("character_count")
+                elif "invalid relevance" in error_message:
+                    encountered_errors.add("invalid_relevance")
+                elif "missing required fields" in error_message:
+                    encountered_errors.add("missing_fields")
+                else:
+                    encountered_errors.add("other")
+                
+                # Reset to base prompt and add ALL encountered error fixes
                 prompt = default_prompt
                 if extra_prompt:
                     prompt += "\n\nเพิ่มเติม: " + extra_prompt
                 
-                # Add concise error correction based on error type
-                error_message = str(e)[:100]  # Limit error message length
+                # Build cumulative error corrections
+                error_fixes = []
                 
-                if "forbidden field names" in error_message:
-                    prompt += "\n\n**FIELD NAME ERROR - FIX REQUIRED:**\nUSE ONLY: name, age, role, relationship, characteristics, secret, motive, alibi, details"
-                elif "must be in Thai" in error_message:
-                    prompt += "\n\n**LANGUAGE ERROR - FIX REQUIRED:**\nAll fields must be in Thai EXCEPT: characteristics, image_generation_prompt (English only)"
-                elif "must be in English" in error_message:
-                    prompt += "\n\n**LANGUAGE ERROR - FIX REQUIRED:**\ncharacteristics and image_generation_prompt must be in English only"
-                elif "Invalid evidence count" in error_message:
-                    prompt += "\n\n**EVIDENCE ERROR - FIX REQUIRED:**\nMust generate at least 6 pieces of evidence"
-                elif "Invalid character count" in error_message:
-                    prompt += "\n\n**CHARACTER ERROR - FIX REQUIRED:**\nMust generate between 4-6 characters"
-                else:
-                    prompt += f"\n\n**ERROR - FIX REQUIRED:**\n{error_message}"
+                if "forbidden_fields" in encountered_errors or "missing_fields" in encountered_errors:
+                    error_fixes.append("**FIELD NAMES:** USE EXACTLY: name, age, role, relationship, characteristics, secret, motive, alibi, details")
                 
-                print(f"Retrying script generation with targeted fix (attempt {attempt + 2}/{max_retries})")
+                if "wrong_thai" in encountered_errors or "wrong_english" in encountered_errors:
+                    error_fixes.append("**LANGUAGES:** Thai for all fields EXCEPT characteristics+image_generation_prompt (English only)")
+                
+                if "evidence_count" in encountered_errors:
+                    error_fixes.append("**EVIDENCE:** Generate exactly 6-12 pieces of evidence")
+                
+                if "character_count" in encountered_errors:
+                    error_fixes.append("**CHARACTERS:** Generate exactly 4-6 characters")
+                
+                if "invalid_relevance" in encountered_errors:
+                    error_fixes.append("**RELEVANCE:** Use only กายภาพ, จิตวิทยา, หลอกลวง, เทคโนโลยี")
+                
+                if "other" in encountered_errors:
+                    error_fixes.append(f"**OTHER:** {error_message[:80]}")
+                
+                if error_fixes:
+                    prompt += "\n\n**CRITICAL FIXES REQUIRED:**\n" + "\n".join(error_fixes)
+                
+                print(f"Retrying script generation with cumulative fixes: {list(encountered_errors)} (attempt {attempt + 2}/{max_retries})")
                 continue
                 
 async def generate_character_images(people: List[Dict], game_id: str):
